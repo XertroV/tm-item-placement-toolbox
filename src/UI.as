@@ -63,17 +63,19 @@ void DrawLayouts(NPlugItemPlacement_SClass@ pc) {
         return;
     }
     uint activeIx = 0;
+    string LayoutsStr;
     if (pc.GroupCurPatchLayouts.Length > 0) {
         activeIx = pc.GroupCurPatchLayouts[0];
-        for (uint i = 1; i < pc.GroupCurPatchLayouts.Length; i++) {
-            if (pc.GroupCurPatchLayouts[i] != activeIx) {
-                activeIx == pc.GroupCurPatchLayouts[i];
-                break;
+        bool hasSet = false;
+        for (uint i = 0; i < pc.GroupCurPatchLayouts.Length; i++) {
+            if (pc.GroupCurPatchLayouts[i] != 0 && !hasSet) {
+                // activeIx = pc.GroupCurPatchLayouts[i];
+                hasSet = true;
             }
-
+            LayoutsStr += (i > 0 ? "," : "") + pc.GroupCurPatchLayouts[i];
         }
     }
-    UI::Text("Current Layout: ("+activeIx+")");
+    UI::Text("Current Layout: ("+activeIx+"); GCPLs: " + LayoutsStr);
     AddSimpleTooltip("Note: this might not always be accurate. Please report bugs.");
     DrawLayoutOpts(pc.PatchLayouts[activeIx], activeIx, true);
     UI::Separator();
