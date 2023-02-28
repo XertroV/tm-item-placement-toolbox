@@ -54,8 +54,8 @@ void Render() {
     if (!ShowWindow || !IsInEditor) return;
     vec2 size = vec2(600, 400);
     vec2 pos = (vec2(Draw::GetWidth(), Draw::GetHeight()) - size) / 2.;
-    UI::SetNextWindowSize(int(size.x), int(size.y), UI::Cond::Appearing);
-    UI::SetNextWindowPos(int(pos.x), int(pos.y), UI::Cond::Appearing);
+    UI::SetNextWindowSize(int(size.x), int(size.y), UI::Cond::FirstUseEver);
+    UI::SetNextWindowPos(int(pos.x), int(pos.y), UI::Cond::FirstUseEver);
     UI::PushStyleColor(UI::Col::FrameBg, vec4(.2, .2, .2, .5));
     if (UI::Begin(MenuTitle, ShowWindow)) {
         DrawMainWindowInner();

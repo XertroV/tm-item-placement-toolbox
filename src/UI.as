@@ -42,7 +42,7 @@ void DrawPlacement(CGameItemModel@ curr) {
 
 void DrawMainPlacement(NPlugItemPlacement_SClass@ pc) {
     pc.AlwaysUp = UI::Checkbox("Always Up", pc.AlwaysUp);
-    AddSimpleTooltip("When false, the item will be perpendicular\nto the surface -- useful for sloped blocks. (Default: true)");
+    AddSimpleTooltip("When false, the item will be perpendicular to the surface.\nUseful for sloped blocks. (Default: true)");
     pc.AlignToInterior = UI::Checkbox("Align To Interior", pc.AlignToInterior);
     AddSimpleTooltip("When false, the item can be pre-rotated\n(before snapping) to get different alignments.\n(Default: true)");
     pc.AlignToWorldDir = UI::Checkbox("Align To World Dir", pc.AlignToWorldDir);
