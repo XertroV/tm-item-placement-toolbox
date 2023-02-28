@@ -62,7 +62,17 @@ void DrawLayouts(NPlugItemPlacement_SClass@ pc) {
         UI::Text("Nothing to do");
         return;
     }
-    auto activeIx = pc.GroupCurPatchLayouts.Length >= 4 ? pc.GroupCurPatchLayouts[3] : 0;
+    uint activeIx = 0;
+    if (pc.GroupCurPatchLayouts.Length > 0) {
+        activeIx = pc.GroupCurPatchLayouts[0];
+        for (uint i = 1; i < pc.GroupCurPatchLayouts.Length; i++) {
+            if (pc.GroupCurPatchLayouts[i] != activeIx) {
+                activeIx == pc.GroupCurPatchLayouts[i];
+                break;
+            }
+
+        }
+    }
     UI::Text("Current Layout: ("+activeIx+")");
     AddSimpleTooltip("Note: this might not always be accurate. Please report bugs.");
     DrawLayoutOpts(pc.PatchLayouts[activeIx], activeIx, true);
