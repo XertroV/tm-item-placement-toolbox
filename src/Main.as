@@ -57,7 +57,7 @@ void Render() {
     UI::SetNextWindowSize(int(size.x), int(size.y), UI::Cond::FirstUseEver);
     UI::SetNextWindowPos(int(pos.x), int(pos.y), UI::Cond::FirstUseEver);
     UI::PushStyleColor(UI::Col::FrameBg, vec4(.2, .2, .2, .5));
-    if (UI::Begin(MenuTitle, ShowWindow)) {
+    if (UI::Begin(MenuTitle, ShowWindow, UI::WindowFlags::None)) {
         DrawMainWindowInner();
     }
     UI::End();

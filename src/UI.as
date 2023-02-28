@@ -7,6 +7,7 @@ void DrawMainWindowInner() {
     auto curr = editor.CurrentItemModel;
     if (curr is null) {
         UI::Text("Select an item...");
+        return;
     }
     UI::Text("Item: " + curr.Name);
 
@@ -57,6 +58,10 @@ void DrawLayouts(NPlugItemPlacement_SClass@ pc) {
      */
     // UI::Text("Nb Layouts: " + pc.GroupCurPatchLayouts.Length);
     UI::Text("Nb Layouts: " + pc.PatchLayouts.Length + " (Not all will be available.)");
+    if (pc.PatchLayouts.Length == 0) {
+        UI::Text("Nothing to do");
+        return;
+    }
     auto activeIx = pc.GroupCurPatchLayouts.Length >= 4 ? pc.GroupCurPatchLayouts[3] : 0;
     UI::Text("Current Layout: ("+activeIx+")");
     AddSimpleTooltip("Note: this might not always be accurate. Please report bugs.");

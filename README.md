@@ -1,5 +1,7 @@
 # Item Placement Toolbox
 
+Edit the default item placement layouts. Change alignment, number of items, spacing, offset, and more.
+
 License: Public Domain
 
 Authors: XertroV
