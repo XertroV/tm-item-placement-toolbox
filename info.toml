@@ -1,0 +1,8 @@
+[meta]
+name     = "Item Placement Toolbox"
+author   = "XertroV"
+category = "Editor"
+version  = "0.1.0"
+
+[script]
+#__DEFINES__
