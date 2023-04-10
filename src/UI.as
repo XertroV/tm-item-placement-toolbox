@@ -37,6 +37,16 @@ void DrawMainWindowInner() {
         DrawCustomItemLayouts();
         UI::EndTabItem();
     }
+
+    if (UI::BeginTabItem("Effects")) {
+        DrawItemEffects();
+        UI::EndTabItem();
+    }
+
+    if (UI::BeginTabItem("Item Rotations")) {
+
+        UI::EndTabItem();
+    }
     UI::EndTabBar();
 }
 

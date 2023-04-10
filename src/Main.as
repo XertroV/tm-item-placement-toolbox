@@ -49,7 +49,7 @@ void RenderMenu() {
 
 /** Render function called every frame.
 */
-void Render() {
+void RenderInterface() {
     if (!UserHasPermissions) return;
     if (!ShowWindow || !IsInEditor) return;
     vec2 size = vec2(600, 400);
