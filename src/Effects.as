@@ -113,7 +113,7 @@ void ApplyJitter(ref@ _r) {
     print('jittering: ' + item.ItemModel.Name);
     if (jitterPos) {
         auto _jitter = jitterPosAmt * vec3(Math::Rand(-1.0, 1.0), Math::Rand(-1.0, 1.0), Math::Rand(-1.0, 1.0));
-        item.AbsolutePositionInMap += _jitter;
+        item.AbsolutePositionInMap += jitterPosOffset + _jitter;
         trace(_jitter.ToString());
     }
     if (jitterRot) {

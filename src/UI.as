@@ -38,13 +38,13 @@ void DrawMainWindowInner() {
         UI::EndTabItem();
     }
 
-    if (UI::BeginTabItem("Effects")) {
+    if (UI::BeginTabItem("Effects ("+NbEffectsActive()+")###eff-main-tab")) {
         DrawItemEffects();
         UI::EndTabItem();
     }
 
     if (UI::BeginTabItem("Item Rotations")) {
-
+        DrawItemCursorProps();
         UI::EndTabItem();
     }
     UI::EndTabBar();

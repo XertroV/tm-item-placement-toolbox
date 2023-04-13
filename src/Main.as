@@ -18,6 +18,11 @@ void MainCoro() {
         if (editor is null == IsInEditor) {
             IsInEditor = !IsInEditor;
         }
+        if (!IsInEditor) {
+            sleep(100);
+            continue;
+        }
+        UpdateEditorWatchers();
     }
 }
 

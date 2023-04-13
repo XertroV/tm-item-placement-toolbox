@@ -1,3 +1,14 @@
+void UpdateEditorWatchers() {
+    if (S_CopyPickedItemRotation) CheckForPickedItem_CopyRotation();
+    if (g_UseSnappedLoc) EnsureSnappedLoc();
+}
+
+
+
+
+
+
+
 void RefreshItemPosRot() {
     // very hacky method: cut the whole map and ctrl+z it.
     auto app = cast<CGameManiaPlanet>(GetApp());
