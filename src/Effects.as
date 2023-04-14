@@ -23,20 +23,43 @@ void DrawItemEffects() {
         Draw_Effect_Jitter();
         UI::EndTabItem();
     }
+    if (UI::BeginTabItem("Dissociate")) {
+        Draw_Effect_Dissociate();
+        UI::EndTabItem();
+    }
     UI::EndTabBar();
 }
 
 
 
 void Draw_FilterItems() {
-
+    UI::Text("Todo, LMK if you want this.\n(Feedback helps prioritization)");
 }
 
 
 
 
+void Draw_Effect_Dissociate() {
+    UI::TextWrapped("This will dissociate items from blocks. e.g., if you place road signs along a block, and then delete the block, the road signs are also deleted because of the association. This will dissociate items from blocks, so each thing needs to be deleted individually (in the preceding case). This also removes the association with macroblocks (or so it appears, at least).");
+    if (UI::Button("Dissociate Items from Blocks")) {
+        RunDissociation();
+    }
+}
 
 
+void RunDissociation() {
+    try {
+        auto editor = cast<CGameCtnEditorFree>(GetApp().Editor);
+        auto map = editor.Challenge;
+        for (uint i = 0; i < map.AnchoredObjects.Length; i++) {
+            auto item = map.AnchoredObjects[i];
+            Dev::SetOffset(item, 0x90, uint64(0));
+        }
+        Notify("Items dissociated.");
+    } catch {
+        NotifyWarning("Exception during RunDissociation: " + getExceptionInfo());
+    }
+}
 
 
 bool jitterPos = true;
@@ -50,7 +73,7 @@ vec3 jitterRotAmt = vec3(Math::PI);
 void Draw_Effect_Jitter() {
     UI::Text("Jitter applies a random offset to position and/or rotation.");
     UI::TextWrapped("\\$f80Note!\\$z Refreshing items will not work for the most recently placed item! You must place an extra item, delete it, and then it will work as expected. You can also save and reload the map instead of using the refresh items button -- same restrictions apply.");
-    UI::TextWrapped("\\$f80Note!\\$z Too much ctrl+z will undo the jitter (and a re-do is required).");
+    UI::TextWrapped("\\$f80Note!\\$z Too much ctrl+z can undo the jitter (and a re-do is then required if jitter isn't active at the time of the undo).");
     if (UI::Button(e_JitterActive ? "Deactivate" : "Activate")) {
         ToggleJitter();
     }
@@ -65,8 +88,8 @@ void Draw_Effect_Jitter() {
     AddSimpleTooltip("Offset applied to position before jitter.");
     jitterPosAmt = UI::InputFloat3("Position Radius Jitter", jitterPosAmt);
     AddSimpleTooltip("Position will have a random amount added to it, up to +/- the amount specified.");
-    jitterPosSin = UI::Checkbox("Position Jitter - Sine Wave", jitterPosSin);
-    AddSimpleTooltip("Sine wave profile will be applied. More items will be clustered around the center.\n(Theta offset = 90, so technically cosine but yeah.)");
+    // jitterPosSin = UI::Checkbox("Position Jitter - Sine Wave", jitterPosSin);
+    // AddSimpleTooltip("Sine wave profile will be applied. More items will be clustered around the center.\n(Theta offset = 90, so technically cosine but yeah.)");
     UI::Separator();
     jitterRot = UI::Checkbox("Apply Rotation Jitter", jitterRot);
     AddSimpleTooltip("Apply a randomization to placed items' rotations");

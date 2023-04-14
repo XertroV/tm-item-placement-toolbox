@@ -13,6 +13,9 @@ void DrawItemCursorProps() {
         cursor.Pitch = 0;
         cursor.Roll = 0;
     }
+    UI::BeginDisabled();
+    UI::AlignTextToFramePadding();
+    UI::Text("Todo:");
     UI::SameLine();
     if (UI::Button("Save Favorite")) {
         //
@@ -21,6 +24,7 @@ void DrawItemCursorProps() {
     if (UI::Button("Load Favorite")) {
         //
     }
+    UI::EndDisabled();
 }
 
 // East + 75deg is nearly north.
