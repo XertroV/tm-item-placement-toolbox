@@ -75,8 +75,9 @@ void RenderInterface() {
 
 void AddSimpleTooltip(const string &in msg) {
     if (UI::IsItemHovered()) {
+        UI::SetNextWindowSize(400, 0, UI::Cond::Always);
         UI::BeginTooltip();
-        UI::Text(msg);
+        UI::TextWrapped(msg);
         UI::EndTooltip();
     }
 }

@@ -7,11 +7,33 @@ void DrawItemCursorProps() {
     // this only works for blocks and is to do with freeblock positioning i think
     // g_UseSnappedLoc = UI::Checkbox("Force Snapped Location", g_UseSnappedLoc);
     auto cursor = editor.Cursor;
-    cursor.Pitch = UI::InputFloat("Pitch", cursor.Pitch, Math::PI / 12.);
-    cursor.Roll = UI::InputFloat("Roll", cursor.Roll, Math::PI / 12.);
+    cursor.Pitch = UI::InputFloat("Pitch", cursor.Pitch, Math::PI / 24.);
+    cursor.Roll = UI::InputFloat("Roll", cursor.Roll, Math::PI / 24.);
+
+    if (UI::BeginCombo("Dir", tostring(cursor.Dir))) {
+        for (uint i = 0; i < 4; i++) {
+            auto d = CGameCursorBlock::ECardinalDirEnum(i);
+            if (UI::Selectable(tostring(d), d == cursor.Dir)) {
+                cursor.Dir = d;
+            }
+        }
+        UI::EndCombo();
+    }
+    if (UI::BeginCombo("AdditionalDir", tostring(cursor.AdditionalDir))) {
+        for (uint i = 0; i < 6; i++) {
+            auto d = CGameCursorBlock::EAdditionalDirEnum(i);
+            if (UI::Selectable(tostring(d), d == cursor.AdditionalDir)) {
+                cursor.AdditionalDir = d;
+            }
+        }
+        UI::EndCombo();
+    }
+
     if (UI::Button("Reset")) {
         cursor.Pitch = 0;
         cursor.Roll = 0;
+        cursor.AdditionalDir = CGameCursorBlock::EAdditionalDirEnum::P0deg;
+        cursor.Dir = CGameCursorBlock::ECardinalDirEnum::North;
     }
     UI::BeginDisabled();
     UI::AlignTextToFramePadding();
@@ -38,7 +60,6 @@ void CheckForPickedItem_CopyRotation() {
     auto cursor = editor.Cursor;
     cursor.Pitch = po.Pitch;
     cursor.Roll = po.Roll;
-    // subtract math::PI/2. here (instead of ::PI) to align to north/east/etc
     auto yaw = ((po.Yaw + Math::PI * 2.) % (Math::PI * 2.));
     cursor.Dir = yaw < Math::PI
         ? yaw < Math::PI/2.
@@ -49,6 +70,7 @@ void CheckForPickedItem_CopyRotation() {
             : CGameCursorBlock::ECardinalDirEnum::East
         ;
     auto yQuarter = yaw % (Math::PI / 2.);
+    // multiply by 1.001 so we avoid rounding errors from yaw ranges -- actually not sure if we need it
     int yawStep = Math::Clamp(int(Math::Floor(yQuarter / Math::PI * 2. * 6. * 1.001) % 6), 0, 5);
     cursor.AdditionalDir = CGameCursorBlock::EAdditionalDirEnum(yawStep);
 }
@@ -58,4 +80,69 @@ void EnsureSnappedLoc() {
     if (editor is null) return;
     if (editor.Cursor is null) return;
     editor.Cursor.UseSnappedLoc = true;
+}
+
+
+
+
+class EditorRotation {
+    vec3 pry;
+    CGameCursorBlock::ECardinalDirEnum dir;
+    CGameCursorBlock::EAdditionalDirEnum additionalDir;
+
+    EditorRotation(float pitch, float roll, float yaw) {
+        pry = vec3(pitch, roll, yaw);
+        CalcDirFromPry();
+    }
+
+    EditorRotation(float pitch, float roll, CGameCursorBlock::ECardinalDirEnum dir, CGameCursorBlock::EAdditionalDirEnum additionalDir) {
+        this.dir = dir;
+        this.additionalDir = additionalDir;
+        pry = vec3(pitch, roll, 0);
+        CalcYawFromDir();
+    }
+
+    void CalcYawFromDir() {
+        if (dir == CGameCursorBlock::ECardinalDirEnum::East)
+            pry.z = Math::PI * 3. / 2.;
+        else if (dir == CGameCursorBlock::ECardinalDirEnum::South)
+            pry.z = Math::PI;
+        else if (dir == CGameCursorBlock::ECardinalDirEnum::West)
+            pry.z = Math::PI / 2.;
+        else if (dir == CGameCursorBlock::ECardinalDirEnum::North)
+            pry.z = 0;
+        pry.z += float(int(additionalDir)) / 6. * Math::PI / 2.;
+    }
+
+    void CalcDirFromPry() {
+        auto yaw = ((pry.z + Math::PI * 2.) % (Math::PI * 2.));
+        dir = yaw < Math::PI
+            ? yaw < Math::PI/2.
+                ? CGameCursorBlock::ECardinalDirEnum::North
+                : CGameCursorBlock::ECardinalDirEnum::West
+            : yaw < Math::PI/2.*3.
+                ? CGameCursorBlock::ECardinalDirEnum::South
+                : CGameCursorBlock::ECardinalDirEnum::East
+            ;
+        auto yQuarter = yaw % (Math::PI / 2.);
+        // multiply by 1.001 so we avoid rounding errors from yaw ranges -- actually not sure if we need it
+        int yawStep = Math::Clamp(int(Math::Floor(yQuarter / Math::PI * 2. * 6. * 1.001) % 6), 0, 5);
+        additionalDir = CGameCursorBlock::EAdditionalDirEnum(yawStep);
+    }
+
+    float get_Pitch() {
+        return pry.x;
+    }
+    float get_Roll() {
+        return pry.y;
+    }
+    float get_Yaw() {
+        return pry.x;
+    }
+    CGameCursorBlock::ECardinalDirEnum get_Dir() {
+        return dir;
+    }
+    CGameCursorBlock::EAdditionalDirEnum get_AdditionalDir() {
+        return additionalDir;
+    }
 }

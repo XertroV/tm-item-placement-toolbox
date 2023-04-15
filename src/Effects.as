@@ -39,29 +39,6 @@ void Draw_FilterItems() {
 
 
 
-void Draw_Effect_Dissociate() {
-    UI::TextWrapped("This will dissociate items from blocks. e.g., if you place road signs along a block, and then delete the block, the road signs are also deleted because of the association. This will dissociate items from blocks, so each thing needs to be deleted individually (in the preceding case). This also removes the association with macroblocks (or so it appears, at least).");
-    if (UI::Button("Dissociate Items from Blocks")) {
-        RunDissociation();
-    }
-}
-
-
-void RunDissociation() {
-    try {
-        auto editor = cast<CGameCtnEditorFree>(GetApp().Editor);
-        auto map = editor.Challenge;
-        for (uint i = 0; i < map.AnchoredObjects.Length; i++) {
-            auto item = map.AnchoredObjects[i];
-            Dev::SetOffset(item, 0x90, uint64(0));
-        }
-        Notify("Items dissociated.");
-    } catch {
-        NotifyWarning("Exception during RunDissociation: " + getExceptionInfo());
-    }
-}
-
-
 bool jitterPos = true;
 vec3 jitterPosAmt = vec3(8, 1, 8);
 vec3 jitterPosOffset = vec3(0, 0, 0);
