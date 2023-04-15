@@ -1,3 +1,4 @@
+[Setting hidden]
 bool g_SetBlockLocationOnDissociation = true;
 
 uint lastNbSelected = 0;
@@ -5,33 +6,43 @@ uint lastNbSelected = 0;
 void Draw_Effect_Dissociate() {
     auto editor = cast<CGameCtnEditorFree>(GetApp().Editor);
 
+    UI::TextWrapped("This will dissociate items from blocks. e.g., if you place road signs along a block, and then delete the block, the road signs are also deleted because of the association. (Most of the time) each item needs to be deleted individually after dissociation. This also removes the association with macroblocks (or so it appears, at least).");
+
+    UI::Separator();
+
     g_SetBlockLocationOnDissociation = UI::Checkbox("Set `item.BlockUnitCoord` upon dissociation", g_SetBlockLocationOnDissociation);
     AddSimpleTooltip("When true: Items will be selectable / copyable. If resting on a normal (non-ghost, non-free block), they will still be deleted along with that block.\nWhen false: Items will not be selectable / copyable, and will never be deleted when the anchored block is deleted.");
 
     UI::Separator();
 
     UI::AlignTextToFramePadding();
+    UI::Text("Dissociate Newly Placed Items");
+    if (UI::Button(e_DissociateNew ? "Deactivate##dissociate" : "Activate##dissociate")) {
+        ToggleDissociateEffect();
+    }
+
+    UI::Separator();
+
+    UI::AlignTextToFramePadding();
     UI::Text("Global Dissociation");
 
-    UI::TextWrapped("This will dissociate items from blocks. e.g., if you place road signs along a block, and then delete the block, the road signs are also deleted because of the association. This will dissociate items from blocks, so each thing needs to be deleted individually (in the preceding case). This also removes the association with macroblocks (or so it appears, at least).");
     if (UI::Button("Dissociate Items from Blocks")) {
         RunDissociation();
     }
     UI::Separator();
     UI::AlignTextToFramePadding();
     UI::TextWrapped("Selected Dissociation");
-    UI::TextWrapped("This will dissociate all items that are associated with blocks that are currently selected using the Copy tool.");
+    UI::TextWrapped("This will dissociate all items that are associated with blocks that are currently selected using the Copy tool.\n\\$f80Note: does not work yet for items on free blocks (normal / ghost only).");
 
     auto nbSelected = Dev::GetOffsetUint32(editor, 0xB58);
-    UI::AlignTextToFramePadding();
-    UI::TextWrapped("Currently Selected Regions: " + nbSelected);
-
     if (nbSelected != lastNbSelected) {
         lastNbSelected = nbSelected;
         ResetSelectedCache();
     }
 
     UI::AlignTextToFramePadding();
+    UI::Text("Currently Selected Regions: " + nbSelected);
+    UI::SameLine();
     UI::Text("Selected Items / Blocks: " + selectedItems.Length + " / " + selectedBlocks.Length);
     UI::SameLine();
     if (UI::Button("Update##nbSelectedItemsBlocks")) {
@@ -62,9 +73,9 @@ void UpdateNbSelectedItemsAndBlocks(CGameCtnEditorFree@ editor) {
     auto selectedBuf = Dev::GetOffsetNod(editor, 0xB50);
     nat3 coord = nat3(0);
     for (uint i = 0; i < nbSelected; i++) {
-        coord.x = Dev::GetOffsetUint32(selectedBuf, i * 0xC);
-        coord.y = Dev::GetOffsetUint32(selectedBuf, i * 0xC + 0x4);
-        coord.z = Dev::GetOffsetUint32(selectedBuf, i * 0xC + 0x8);
+coord.x = Dev::GetOffsetUint32(selectedBuf, i * 0xC);
+coord.y = Dev::GetOffsetUint32(selectedBuf, i * 0xC + 0x4);
+coord.z = Dev::GetOffsetUint32(selectedBuf, i * 0xC + 0x8);
         selectedCoords[coord.ToString()] = true;
     }
     // find items with those coords
@@ -149,3 +160,39 @@ bool DissociateItem(CGameCtnAnchoredObject@ item) {
  *
  * 0xC0: uint16 color: 0 for none, then 1-5
  */
+
+
+// watch for new items for effect
+
+
+void ToggleDissociateEffect() {
+    e_DissociateNew = !e_DissociateNew;
+    if (e_DissociateNew) {
+        startnew(DissociateItemsWatcher);
+    }
+}
+
+void DissociateItemsWatcher() {
+    auto editor = cast<CGameCtnEditorFree>(GetApp().Editor);
+    auto nbItems = editor.Challenge.AnchoredObjects.Length;
+    while (e_DissociateNew) {
+        yield();
+        @editor = cast<CGameCtnEditorFree>(GetApp().Editor);
+        if (editor is null) break;
+        if (nbItems != editor.Challenge.AnchoredObjects.Length) {
+            // bool newItems = editor.Challenge.AnchoredObjects.Length > nbItems;
+            auto prevNb = nbItems;
+            uint dCounter = 0;
+            nbItems = editor.Challenge.AnchoredObjects.Length;
+            // should exit early if prevNb > nbItems -- i.e., an item was deleted;
+            for (uint i = prevNb; i < editor.Challenge.AnchoredObjects.Length; i++) {
+                auto item = editor.Challenge.AnchoredObjects[i];
+                if (DissociateItem(item))
+                    dCounter++;
+                if (i % 1000 == 0) yield();
+            }
+            Notify('Dissociated items: ' + dCounter);
+        }
+    }
+    e_DissociateNew = false;
+}

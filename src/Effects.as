@@ -1,9 +1,10 @@
 bool e_JitterActive = false;
-
+bool e_DissociateNew = false;
 
 int NbEffectsActive() {
     int ret = 0;
     if (e_JitterActive) ret++;
+    if (e_DissociateNew) ret++;
     return ret;
 }
 
@@ -17,6 +18,7 @@ void DrawItemEffects() {
     }
     if (UI::BeginTabItem("Active Effects ("+NbEffectsActive()+")###active-eff", UI::TabItemFlags::Trailing)) {
         if (e_JitterActive) UI::Text("Jitter");
+        if (e_DissociateNew) UI::Text("Dissociate New");
         UI::EndTabItem();
     }
     if (UI::BeginTabItem("Jitter")) {
@@ -51,7 +53,7 @@ void Draw_Effect_Jitter() {
     UI::Text("Jitter applies a random offset to position and/or rotation.");
     UI::TextWrapped("\\$f80Note!\\$z Refreshing items will not work for the most recently placed item! You must place an extra item, delete it, and then it will work as expected. You can also save and reload the map instead of using the refresh items button -- same restrictions apply.");
     UI::TextWrapped("\\$f80Note!\\$z Too much ctrl+z can undo the jitter (and a re-do is then required if jitter isn't active at the time of the undo).");
-    if (UI::Button(e_JitterActive ? "Deactivate" : "Activate")) {
+    if (UI::Button(e_JitterActive ? "Deactivate##jitter" : "Activate##jitter")) {
         ToggleJitter();
     }
     UI::SameLine();
@@ -97,11 +99,7 @@ void JitterWatcher() {
                 auto item = editor.Challenge.AnchoredObjects[i];
                 ApplyJitter(item);
                 if (i % 1000 == 0) yield();
-                // ApplyJitter(item);
-                // item.IsLocationInitialised = false;
             }
-            // ApplyJitter(editor);
-            // RefreshItemPosRot();
         }
     }
     e_JitterActive = false;
