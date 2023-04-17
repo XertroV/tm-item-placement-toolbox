@@ -78,32 +78,42 @@ void Draw_Effect_Jitter() {
 
 void ToggleJitter() {
     e_JitterActive = !e_JitterActive;
-    if (e_JitterActive) {
-        startnew(JitterWatcher);
+    // if (e_JitterActive) {
+    //     startnew(JitterWatcher);
+    // }
+}
+
+uint nbItems = 0;
+void Jitter_CheckNewItems() {
+    auto editor = cast<CGameCtnEditorFree>(GetApp().Editor);
+    if (editor is null) {
+        e_JitterActive = false;
+        return;
+    }
+    if (!e_JitterActive) {
+        nbItems = editor.Challenge.AnchoredObjects.Length;
+        return;
+    }
+
+    if (nbItems != editor.Challenge.AnchoredObjects.Length) {
+        auto prevNb = nbItems;
+        nbItems = editor.Challenge.AnchoredObjects.Length;
+        // should exit early if prevNb > nbItems -- i.e., an item was deleted;
+        for (uint i = prevNb; i < editor.Challenge.AnchoredObjects.Length; i++) {
+            auto item = editor.Challenge.AnchoredObjects[i];
+            ApplyJitter(item);
+        }
     }
 }
 
-void JitterWatcher() {
-    auto editor = cast<CGameCtnEditorFree>(GetApp().Editor);
-    auto nbItems = editor.Challenge.AnchoredObjects.Length;
-    while (e_JitterActive) {
-        yield();
-        @editor = cast<CGameCtnEditorFree>(GetApp().Editor);
-        if (editor is null) break;
-        if (nbItems != editor.Challenge.AnchoredObjects.Length) {
-            // bool newItems = editor.Challenge.AnchoredObjects.Length > nbItems;
-            auto prevNb = nbItems;
-            nbItems = editor.Challenge.AnchoredObjects.Length;
-            // should exit early if prevNb > nbItems -- i.e., an item was deleted;
-            for (uint i = prevNb; i < editor.Challenge.AnchoredObjects.Length; i++) {
-                auto item = editor.Challenge.AnchoredObjects[i];
-                ApplyJitter(item);
-                if (i % 1000 == 0) yield();
-            }
-        }
-    }
-    e_JitterActive = false;
-}
+// void JitterWatcher() {
+//     auto editor = cast<CGameCtnEditorFree>(GetApp().Editor);
+//     auto nbItems = editor.Challenge.AnchoredObjects.Length;
+//     while (e_JitterActive) {
+//         yield();
+//     }
+//     e_JitterActive = false;
+// }
 
 // void ApplyJitter(CGameCtnAnchoredObject@ item) {
 void ApplyJitter(ref@ _r) {

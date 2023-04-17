@@ -1,6 +1,8 @@
 void UpdateEditorWatchers() {
     if (S_CopyPickedItemRotation) CheckForPickedItem_CopyRotation();
     if (g_UseSnappedLoc) EnsureSnappedLoc();
+    UpdatePickedItemProps();
+    Jitter_CheckNewItems();
 }
 
 

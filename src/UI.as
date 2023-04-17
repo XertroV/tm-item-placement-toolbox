@@ -43,7 +43,7 @@ void DrawMainWindowInner() {
         UI::EndTabItem();
     }
 
-    if (UI::BeginTabItem("Item Rotations")) {
+    if (UI::BeginTabItem("Item Properties")) {
         DrawItemCursorProps();
         UI::EndTabItem();
     }

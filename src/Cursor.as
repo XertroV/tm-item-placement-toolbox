@@ -47,7 +47,32 @@ void DrawItemCursorProps() {
         //
     }
     UI::EndDisabled();
+
+    UI::Separator();
+
+    UI::Text("Picked Item Properties:");
+
+
+    UI::Text("Name: " + lastPickedItemName);
+    UI::Text("Pos: " + lastPickedItemPos.ToString());
+    UI::Text("P,R,Y: " + lastPickedItemRot.ToString());
 }
+
+string lastPickedItemName;
+vec3 lastPickedItemPos = vec3();
+EditorRotation@ lastPickedItemRot = EditorRotation(0, 0, 0);
+
+void UpdatePickedItemProps() {
+    auto editor = cast<CGameCtnEditorFree>(GetApp().Editor);
+    if (editor is null) return;
+    if (editor.PickedObject is null) return;
+    auto po = editor.PickedObject;
+    lastPickedItemName = po.ItemModel.Name;
+    lastPickedItemPos = po.AbsolutePositionInMap;
+    @lastPickedItemRot = EditorRotation(po.Pitch, po.Roll, po.Yaw);
+}
+
+
 
 // East + 75deg is nearly north.
 void CheckForPickedItem_CopyRotation() {
@@ -144,5 +169,8 @@ class EditorRotation {
     }
     CGameCursorBlock::EAdditionalDirEnum get_AdditionalDir() {
         return additionalDir;
+    }
+    const string ToString() const {
+        return pry.ToString();
     }
 }

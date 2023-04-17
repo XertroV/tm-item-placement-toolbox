@@ -5,26 +5,35 @@ void Main() {
     if (!UserHasPermissions) {
         NotifyWarning("This plugin requires the advanced map editor");
     } else {
-       startnew(MainCoro);
+    //    startnew(MainCoro);
     }
 }
 
 bool IsInEditor = false;
 
-void MainCoro() {
-    while (true) {
-        yield();
-        auto editor = cast<CGameCtnEditorFree>(GetApp().Editor);
-        if (editor is null == IsInEditor) {
-            IsInEditor = !IsInEditor;
-        }
-        if (!IsInEditor) {
-            sleep(100);
-            continue;
-        }
-        UpdateEditorWatchers();
+void RenderEarly() {
+    if (!UserHasPermissions) return;
+    auto editor = cast<CGameCtnEditorFree>(GetApp().Editor);
+    if (editor is null == IsInEditor) {
+        IsInEditor = !IsInEditor;
     }
+    UpdateEditorWatchers();
 }
+
+// void MainCoro() {
+//     while (true) {
+//         yield();
+//         auto editor = cast<CGameCtnEditorFree>(GetApp().Editor);
+//         if (editor is null == IsInEditor) {
+//             IsInEditor = !IsInEditor;
+//         }
+//         if (!IsInEditor) {
+//             sleep(100);
+//             continue;
+//         }
+//         UpdateEditorWatchers();
+//     }
+// }
 
 void Notify(const string &in msg) {
     UI::ShowNotification(Meta::ExecutingPlugin().Name, msg);
