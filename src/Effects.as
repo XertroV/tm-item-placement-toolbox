@@ -118,7 +118,7 @@ void Jitter_CheckNewItems() {
 // void ApplyJitter(CGameCtnAnchoredObject@ item) {
 void ApplyJitter(ref@ _r) {
     CGameCtnAnchoredObject@ item = cast<CGameCtnAnchoredObject>(_r);
-    print('jittering: ' + item.ItemModel.Name);
+    print('jittering: ' + item.ItemModel.IdName);
     if (jitterPos) {
         auto _jitter = jitterPosAmt * vec3(Math::Rand(-1.0, 1.0), Math::Rand(-1.0, 1.0), Math::Rand(-1.0, 1.0));
         item.AbsolutePositionInMap += jitterPosOffset + _jitter;

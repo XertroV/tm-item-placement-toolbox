@@ -48,6 +48,9 @@ void DrawItemCursorProps() {
     }
     UI::EndDisabled();
 
+    // UI::Separator();
+    // vec3 pivot = Dev::GetOffsetVec3()
+
     UI::Separator();
 
     UI::Text("Picked Item Properties:");
@@ -67,7 +70,7 @@ void UpdatePickedItemProps() {
     if (editor is null) return;
     if (editor.PickedObject is null) return;
     auto po = editor.PickedObject;
-    lastPickedItemName = po.ItemModel.Name;
+    lastPickedItemName = po.ItemModel.IdName;
     lastPickedItemPos = po.AbsolutePositionInMap;
     @lastPickedItemRot = EditorRotation(po.Pitch, po.Roll, po.Yaw);
 }

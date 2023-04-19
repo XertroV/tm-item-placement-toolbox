@@ -17,7 +17,7 @@ void RenderEarly() {
     if (editor is null == IsInEditor) {
         IsInEditor = !IsInEditor;
     }
-    UpdateEditorWatchers();
+    UpdateEditorWatchers(editor);
 }
 
 // void MainCoro() {

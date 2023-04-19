@@ -17,11 +17,11 @@ void DrawMainWindowInner() {
         }
         return;
     }
-    if (lastItemName != string(currentItem.Name)) {
-        lastItemName = currentItem.Name;
+    if (lastItemName != string(currentItem.IdName)) {
+        lastItemName = currentItem.IdName;
         OnItemChanged();
     }
-    UI::Text("Item: " + currentItem.Name);
+    UI::Text("Item: " + currentItem.IdName);
 
     UI::BeginTabBar("placement tabs");
     if (UI::BeginTabItem("Placement")) {
@@ -47,6 +47,12 @@ void DrawMainWindowInner() {
         DrawItemCursorProps();
         UI::EndTabItem();
     }
+
+    if (UI::BeginTabItem("Repeat")) {
+        Repeat::DrawRepeatTab();
+        UI::EndTabItem();
+    }
+
     UI::EndTabBar();
 }
 
@@ -76,6 +82,7 @@ void DrawPlacement(CGameItemModel@ curr) {
     AddSimpleTooltip("Unknown or untested.\n Default?: 0.0 (some items may differ)");
     pp_content.PivotSnap_Distance = UI::InputFloat("PivotSnap_Distance", pp_content.PivotSnap_Distance, 0.01);
     AddSimpleTooltip("Unknown or untested.\n Defaults?: -1.0, 0.0 (some items may differ)");
+    pp_content.YawOnly = UI::Checkbox("YawOnly", pp_content.YawOnly);
 
     // todo: more
 
@@ -213,7 +220,7 @@ void DrawCustomItemLayouts() {
         UI::Text("Choose an item.");
     } else if (TmpPlacementParam is null) {
         UI::AlignTextToFramePadding();
-        UI::Text("Replace layout of " + currentItem.Name);
+        UI::Text("Replace layout of " + currentItem.IdName);
         for (uint i = 0; i < SampleGameItemNames.Length; i++) {
             if (UI::Button("With layout from " + SampleGameItemNames[i])) {
                 SetCustomPlacementParams(SampleGameItemNames[i]);
