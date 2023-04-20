@@ -151,6 +151,7 @@ bool DissociateItem(CGameCtnAnchoredObject@ item) {
     if (block !is null && g_SetBlockLocationOnDissociation) {
         item.BlockUnitCoord = block.Coord;
     }
+    item.IsFlying = true;
     return true;
 }
 

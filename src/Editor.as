@@ -8,26 +8,64 @@ void UpdateEditorWatchers(CGameCtnEditorFree@ editor) {
 
 
 
+void UpdateNewlyAddedItems(CGameCtnEditorFree@ editor) {
+    auto pmt = cast<CSmEditorPluginMapType>(editor.PluginMapType);
+    auto macroblock = pmt.GetMacroblockModelFromFilePath("Stadium\\Macroblocks\\LightSculpture\\Spring\\FlowerWhiteSmall.Macroblock.Gbx");
+    trace('UpdateNewlyAddedItems macroblock is null: ' + (macroblock is null));
+    auto placed = pmt.PlaceMacroblock_NoDestruction(macroblock, int3(0, 24, 0), CGameEditorPluginMap::ECardinalDirections::North);
+    trace('UpdateNewlyAddedItems placed: ' + placed);
+    bool removed = pmt.RemoveMacroblock(macroblock, int3(0, 24, 0), CGameEditorPluginMap::ECardinalDirections::North);
+    trace('UpdateNewlyAddedItems removed: ' + removed);
+}
 
+
+
+CGameCtnAnchoredObject@ DuplicateAndAddItem(CGameCtnEditorFree@ editor, CGameCtnAnchoredObject@ origItem, bool updateItemsAfter = false) {
+        auto item = CGameCtnAnchoredObject();
+        auto itemTy = Reflection::GetType("CGameCtnAnchoredObject");
+        auto itemModelMember = itemTy.GetMember("ItemModel");
+        // trace('ItemModel offset: ' + itemModelMember.Offset);
+        auto ni_ID = Dev::GetOffsetUint32(item, 0x164);
+
+        auto lastItem = editor.Challenge.AnchoredObjects[editor.Challenge.AnchoredObjects.Length - 1];
+
+        Dev_SetOffsetBytes(item, 0x0, Dev_GetOffsetBytes(origItem, 0x0, itemModelMember.Offset + 0x8));
+        item.IsFlying = true;
+        item.ItemModel.MwAddRef();
+        editor.Challenge.AnchoredObjects.Add(item);
+
+        auto li_ID = Dev::GetOffsetUint32(lastItem, 0x164);
+        auto diff = ni_ID - li_ID;
+        Dev::SetOffset(item, 0x164, ni_ID);
+        Dev::SetOffset(item, 0x168, Dev::GetOffsetUint32(lastItem, 0x168) + diff);
+        Dev::SetOffset(item, 0x16c, Dev::GetOffsetUint32(lastItem, 0x16c) + diff);
+
+        if (updateItemsAfter) {
+            UpdateNewlyAddedItems(editor);
+        }
+        return item;
+}
 
 
 
 void RefreshItemPosRot() {
-    // very hacky method: cut the whole map and ctrl+z it.
+    // very hacky method: basically cut the whole map and ctrl+z it.
     auto app = cast<CGameManiaPlanet>(GetApp());
     auto editor = cast<CGameCtnEditorFree>(app.Editor);
+
     // save and restore item placement mode
     auto mode = GetItemPlacementMode();
     // don't do anything if we're not in an item mode
     if (mode == ItemMode::None) return;
+
+    editor.SweepObjectsAndSave();
+    editor.PluginMapType.Undo();
+    SetItemPlacementMode(mode);
     /* alt impl -- much slower than sweep objects
     // editor.ButtonSelectionBoxSelectAllOnClick();
     // editor.PluginMapType.CopyPaste_Cut();
     // editor.PluginMapType.Undo();
     */
-    editor.SweepObjectsAndSave();
-    editor.PluginMapType.Undo();
-    SetItemPlacementMode(mode);
 }
 
 
