@@ -38,11 +38,12 @@ CGameCtnAnchoredObject@ DuplicateAndAddItem(CGameCtnEditorFree@ editor, CGameCtn
 
         auto li_ID = Dev::GetOffsetUint32(lastItem, 0x164);
         auto diff = ni_ID - li_ID;
+        // unnecessary, shouldn't have changed
         // Dev::SetOffset(item, 0x164, ni_ID);
         // this is some other ID, but gets set when you click 'save' and IDK what it does or matters for
         // Dev::SetOffset(item, 0x168, Dev::GetOffsetUint32(lastItem, 0x168) + diff);
-        // this is required to be set for picking to work correctly
-        Dev::SetOffset(item, 0x16c, li_ID);
+        // this is required to be set for picking to work correctly -- typically they're in the range of like 7k, but setting this to the new items ID doesn't seem to be a problem
+        Dev::SetOffset(item, 0x16c, ni_ID);
 
         if (updateItemsAfter) {
             UpdateNewlyAddedItems(editor);

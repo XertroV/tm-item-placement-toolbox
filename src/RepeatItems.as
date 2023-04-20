@@ -31,6 +31,8 @@ namespace Repeat {
     mat4 itemToIterBaseRotInv = mat4::Identity();
     [Setting hidden]
     vec3 iterBase_Pos = vec3(32, 0, -32);
+    [Setting hidden]
+    vec3 iterBase_Rot = vec3(0,0,0);
 
 
     // a transformation to apply each iteration
@@ -72,7 +74,7 @@ namespace Repeat {
         itemOffset = itemOffsetRot * mat4::Translate(item_Pos);
         internalTRot = EulerToMat(internal_Rot);
         internalT = internalTRot * mat4::Translate(internal_Pos);
-        itemToIterBaseRot = mat4::Identity();
+        itemToIterBaseRot = EulerToMat(iterBase_Rot);
         itemToIterBase = itemToIterBaseRot * mat4::Translate(iterBase_Pos);
         wi_RotMat = EulerToMat(wi_Rot);
         worldIteration = mat4::Scale(wi_Scale) * wi_RotMat * mat4::Translate(wi_Pos);
@@ -139,7 +141,7 @@ namespace Repeat {
 
             vec3 pos3 = (m * vec3()).xyz;
 
-            auto rotV = PitchYawRollFromRotationMatrix(baseRot);
+            auto rotV = PitchYawRollFromRotationMatrix(baseRot * itemToIterBaseInv * internalTInv);
             // rotV = PitchYawRollFromRotationMatrix(m * mat4::Translate(pos3 * -1.));
             auto newItem = DuplicateAndAddItem(editor, origItem, false);
             newItem.AbsolutePositionInMap = pos3;
@@ -182,30 +184,30 @@ namespace Repeat {
         UI::Text("Initial Item Transformation (Gray)");
 
         UI::BeginDisabled();
-        item_Pos = UI::SliderFloat3("Init. Pos Offset", item_Pos, -64, 64, "%.2f");
-        item_Rot = UI::SliderFloat3("Init. Rot Offset", item_Rot, -Math::PI, Math::PI, "%.2f");
+        item_Pos = UI::SliderFloat3("Init. Pos Offset", item_Pos, -64, 64, "%.4f");
+        item_Rot = UI::SliderFloat3("Init. Rot Offset", item_Rot, -Math::PI, Math::PI, "%.4f");
         UI::EndDisabled();
 
         UI::Separator();
 
         UI::Text("Internal Transformation (Cyan)");
 
-        internal_Pos = UI::SliderFloat3("Internal Pos Offset", internal_Pos, -64, 64, "%.2f");
-        internal_Rot = UI::SliderFloat3("Internal Rot Offset", internal_Rot, -Math::PI, Math::PI, "%.2f");
+        internal_Pos = UI::SliderFloat3("Internal Pos Offset", internal_Pos, -64, 64, "%.4f");
+        internal_Rot = UI::SliderFloat3("Internal Rot Offset", internal_Rot, -Math::PI, Math::PI, "%.4f");
 
         UI::Separator();
 
         UI::Text("To Iteration Base (Green)");
 
-        iterBase_Pos = UI::SliderFloat3("Iter. Base Pos Offset", iterBase_Pos, -64, 64, "%.2f");
-        // internal_Rot = UI::SliderFloat3("Internal Rot Offset", internal_Rot, -Math::PI, Math::PI, "%.2f");
+        iterBase_Pos = UI::SliderFloat3("Iter. Base Pos Offset", iterBase_Pos, -64, 64, "%.4f");
+        iterBase_Rot = UI::SliderFloat3("Iter. Base Rot Offset", iterBase_Rot, -Math::PI/12, Math::PI/12, "%.4f");
 
         UI::Separator();
 
         UI::Text("World-Iteration Transformation (Magenta)");
 
-        wi_Pos = UI::InputFloat3("Iter. Pos Offset", wi_Pos);
-        wi_Rot = UI::InputFloat3("Iter. Rot", wi_Rot);
+        wi_Pos = UI::SliderFloat3("Iter. Pos Offset", wi_Pos, -64, 64, "%.4f");
+        wi_Rot = UI::SliderFloat3("Iter. Rot", wi_Rot, -Math::PI/12, Math::PI/12, "%.4f");
         wi_Scale = UI::InputFloat3("Iter. Scale", wi_Scale);
 
         UI::Separator();
@@ -243,11 +245,6 @@ namespace Repeat {
         for (int i = -1; i < 22; i++) {
             nvgCircleWorldPos((EulerToMat(rotBase * 0.314 * float(i)) * startPos).xyz, col);
         }
-        // nvgCircleWorldPos((EulerToMat(vec3(0, 0, -.6)) * startPos).xyz, vec4(1, 0, 0, 1));
-        // nvgCircleWorldPos((EulerToMat(vec3(0, .3, 0)) * startPos).xyz, vec4(0, 1, 0, 1));
-        // nvgCircleWorldPos((EulerToMat(vec3(0, .6, 0)) * startPos).xyz, vec4(0, 1, 0, 1));
-        // nvgCircleWorldPos((EulerToMat(vec3(.3, 0, 0)) * startPos).xyz, vec4(0, 0, 1, 1));
-        // nvgCircleWorldPos((EulerToMat(vec3(.6, 0, 0)) * startPos).xyz, vec4(0, 0, 1, 1));
     };
 
     void DrawHelpers() {
@@ -296,12 +293,12 @@ namespace Repeat {
 
             nvgToWorldPos(pos0, cMagenta);
             nvgToWorldPos(pos1, cGreen);
+
             nvgToWorldPos(pos2, cCyan);
-            // todo: draw helpers at pos2
+            nvgDrawCoordHelpers(base * back2);
+
             nvgToWorldPos(pos3, cGray);
             nvgMoveToWorldPos(pos0);
-
-            nvgDrawCoordHelpers(base * back2);
         }
         nvg::StrokeColor(vec4(1));
         nvg::StrokeWidth(3.);

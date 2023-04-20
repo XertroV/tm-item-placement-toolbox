@@ -77,7 +77,11 @@ void DrawPickedItemProperties() {
     UI::Text("P,Y,R: " + EditorRotation(item.Pitch, item.Roll, item.Yaw).PYRToString());
 
     // todo: nudge doesn't work
+#if DEV
+#else
     return;
+#endif
+
 
     UI::AlignTextToFramePadding();
     UI::Text("Nudge Picked Item:");

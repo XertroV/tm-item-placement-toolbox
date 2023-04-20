@@ -106,16 +106,6 @@ void Jitter_CheckNewItems() {
     }
 }
 
-// void JitterWatcher() {
-//     auto editor = cast<CGameCtnEditorFree>(GetApp().Editor);
-//     auto nbItems = editor.Challenge.AnchoredObjects.Length;
-//     while (e_JitterActive) {
-//         yield();
-//     }
-//     e_JitterActive = false;
-// }
-
-// void ApplyJitter(CGameCtnAnchoredObject@ item) {
 void ApplyJitter(ref@ _r) {
     CGameCtnAnchoredObject@ item = cast<CGameCtnAnchoredObject>(_r);
     print('jittering: ' + item.ItemModel.IdName);
