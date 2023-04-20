@@ -1,5 +1,8 @@
 bool g_UseSnappedLoc = false;
 
+float m_PosStepSize = 0.1;
+float m_RotStepSize = 0.02;
+
 void DrawItemCursorProps() {
     auto editor = cast<CGameCtnEditorFree>(GetApp().Editor);
     if (editor is null) return;
@@ -53,17 +56,106 @@ void DrawItemCursorProps() {
 
     UI::Separator();
 
+    DrawPickedItemProperties();
+}
+
+
+
+
+void DrawPickedItemProperties() {
     UI::Text("Picked Item Properties:");
 
+    if (lastPickedItem is null) {
+        UI::Text("No item has been picked.");
+        return;
+    }
 
-    UI::Text("Name: " + lastPickedItemName);
-    UI::Text("Pos: " + lastPickedItemPos.ToString());
-    UI::Text("P,R,Y: " + lastPickedItemRot.ToString());
+    auto item = lastPickedItem.AsItem();
+
+    UI::Text("Name: " + item.ItemModel.IdName);
+    UI::Text("Pos: " + item.AbsolutePositionInMap.ToString());
+    UI::Text("P,Y,R: " + EditorRotation(item.Pitch, item.Roll, item.Yaw).PYRToString());
+
+    // todo: nudge doesn't work
+    return;
+
+    UI::AlignTextToFramePadding();
+    UI::Text("Nudge Picked Item:");
+
+    vec3 itemPosMod = vec3();
+    vec3 itemRotMod = vec3();
+
+    m_PosStepSize = UI::InputFloat("Pos. Step Size", m_PosStepSize, 0.01);
+    m_RotStepSize = UI::InputFloat("Rot. Step Size", m_RotStepSize, 0.01);
+
+    UI::Text("Pos:");
+    UI::SameLine();
+    if (UI::Button("X+")) {
+        itemPosMod = vec3(m_PosStepSize, 0, 0);
+    }
+    UI::SameLine();
+    if (UI::Button("X-")) {
+        itemPosMod = vec3(-m_PosStepSize, 0, 0);
+    }
+    UI::SameLine();
+    if (UI::Button("Y+")) {
+        itemPosMod = vec3(0, m_PosStepSize, 0);
+    }
+    UI::SameLine();
+    if (UI::Button("Y-")) {
+        itemPosMod = vec3(0, -m_PosStepSize, 0);
+    }
+    UI::SameLine();
+    if (UI::Button("Z+")) {
+        itemPosMod = vec3(0, 0, m_PosStepSize);
+    }
+    UI::SameLine();
+    if (UI::Button("Z-")) {
+        itemPosMod = vec3(0, 0, -m_PosStepSize);
+    }
+
+    UI::Text("Rot:");
+    UI::SameLine();
+    if (UI::Button("P+")) {
+        itemRotMod = vec3(m_RotStepSize, 0, 0);
+    }
+    UI::SameLine();
+    if (UI::Button("P-")) {
+        itemRotMod = vec3(-m_RotStepSize, 0, 0);
+    }
+    UI::SameLine();
+    if (UI::Button("Y+##yaw")) {
+        itemRotMod = vec3(0, m_RotStepSize, 0);
+    }
+    UI::SameLine();
+    if (UI::Button("Y-##yaw")) {
+        itemRotMod = vec3(0, -m_RotStepSize, 0);
+    }
+    UI::SameLine();
+    if (UI::Button("R+")) {
+        itemRotMod = vec3(0, 0, m_RotStepSize);
+    }
+    UI::SameLine();
+    if (UI::Button("R-")) {
+        itemRotMod = vec3(0, 0, -m_RotStepSize);
+    }
+
+    if (itemPosMod.LengthSquared() > 0 || itemRotMod.LengthSquared() > 0) {
+        item.AbsolutePositionInMap += itemPosMod;
+        item.Pitch += itemRotMod.x;
+        item.Yaw += itemRotMod.y;
+        item.Roll += itemRotMod.z;
+        startnew(RefreshItemPosRot);
+    }
 }
+
+
+
 
 string lastPickedItemName;
 vec3 lastPickedItemPos = vec3();
 EditorRotation@ lastPickedItemRot = EditorRotation(0, 0, 0);
+ReferencedNod@ lastPickedItem = null;
 
 void UpdatePickedItemProps() {
     auto editor = cast<CGameCtnEditorFree>(GetApp().Editor);
@@ -73,6 +165,7 @@ void UpdatePickedItemProps() {
     lastPickedItemName = po.ItemModel.IdName;
     lastPickedItemPos = po.AbsolutePositionInMap;
     @lastPickedItemRot = EditorRotation(po.Pitch, po.Roll, po.Yaw);
+    @lastPickedItem = ReferencedNod(po);
 }
 
 
@@ -165,7 +258,7 @@ class EditorRotation {
         return pry.y;
     }
     float get_Yaw() {
-        return pry.x;
+        return pry.z;
     }
     CGameCursorBlock::ECardinalDirEnum get_Dir() {
         return dir;
@@ -175,5 +268,8 @@ class EditorRotation {
     }
     const string ToString() const {
         return pry.ToString();
+    }
+    const string PYRToString() const {
+        return vec3(pry.x, pry.z, pry.y).ToString();
     }
 }

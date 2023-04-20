@@ -19,7 +19,9 @@ void UpdateNewlyAddedItems(CGameCtnEditorFree@ editor) {
 }
 
 
-
+// this is not save and occasionally results in crash-on-saves (but not autosaves)
+// idea 1: autosave after placing more items
+// idea 2: refactor to
 CGameCtnAnchoredObject@ DuplicateAndAddItem(CGameCtnEditorFree@ editor, CGameCtnAnchoredObject@ origItem, bool updateItemsAfter = false) {
         auto item = CGameCtnAnchoredObject();
         auto itemTy = Reflection::GetType("CGameCtnAnchoredObject");
@@ -36,9 +38,11 @@ CGameCtnAnchoredObject@ DuplicateAndAddItem(CGameCtnEditorFree@ editor, CGameCtn
 
         auto li_ID = Dev::GetOffsetUint32(lastItem, 0x164);
         auto diff = ni_ID - li_ID;
-        Dev::SetOffset(item, 0x164, ni_ID);
-        Dev::SetOffset(item, 0x168, Dev::GetOffsetUint32(lastItem, 0x168) + diff);
-        Dev::SetOffset(item, 0x16c, Dev::GetOffsetUint32(lastItem, 0x16c) + diff);
+        // Dev::SetOffset(item, 0x164, ni_ID);
+        // this is some other ID, but gets set when you click 'save' and IDK what it does or matters for
+        // Dev::SetOffset(item, 0x168, Dev::GetOffsetUint32(lastItem, 0x168) + diff);
+        // this is required to be set for picking to work correctly
+        Dev::SetOffset(item, 0x16c, li_ID);
 
         if (updateItemsAfter) {
             UpdateNewlyAddedItems(editor);
@@ -59,13 +63,14 @@ void RefreshItemPosRot() {
     if (mode == ItemMode::None) return;
 
     editor.SweepObjectsAndSave();
+    // yield();
+    /* alt impl -- much slower than sweep objects
+    editor.ButtonSelectionBoxSelectAllOnClick();
+    editor.PluginMapType.CopyPaste_Cut();
+    editor.PluginMapType.Undo();
+    */
     editor.PluginMapType.Undo();
     SetItemPlacementMode(mode);
-    /* alt impl -- much slower than sweep objects
-    // editor.ButtonSelectionBoxSelectAllOnClick();
-    // editor.PluginMapType.CopyPaste_Cut();
-    // editor.PluginMapType.Undo();
-    */
 }
 
 

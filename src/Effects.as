@@ -58,7 +58,7 @@ void Draw_Effect_Jitter() {
     }
     UI::SameLine();
     if (UI::Button("Refresh Items")) {
-        RefreshItemPosRot();
+        startnew(RefreshItemPosRot);
     }
     UI::Separator();
     jitterPos = UI::Checkbox("Apply Position Jitter", jitterPos);

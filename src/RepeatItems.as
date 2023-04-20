@@ -116,46 +116,6 @@ namespace Repeat {
         return mat4::Inverse(pitch*roll*yaw/* *translation */);
     }
 
-    // vec3 MatToEuler(mat4 m) {
-    //     // return quat(m).Euler();
-    //     return ToQuat(m).Euler() * vec3(-1, 1, 1);
-    // }
-
-    // // from Rxelux's `mat4x` lib
-    // quat ToQuat(const mat4 &in m){
-	// 	float x,y,z,w;
-	// 	float trace = m.xx + m.yy + m.zz;
-	// 	if( trace > 0 ) {
-	// 		float s = 0.5f / Math::Sqrt(trace+ 1.0f);
-	// 		w = 0.25f / s;
-	// 		x = ( m.yz - m.zy ) * s;
-	// 		y = ( m.zx - m.xz ) * s;
-	// 		z = ( m.xy - m.yx ) * s;
-	// 	} else {
-	// 		if ( m.xx > m.yy && m.xx > m.zz ) {
-	// 			float s = 2.0f * Math::Sqrt( 1.0f + m.xx - m.yy - m.zz);
-	// 			w = (m.yz - m.zy ) / s;
-	// 			x = 0.25f * s;
-	// 			y = (m.yx + m.xy ) / s;
-	// 			z = (m.zx + m.xz ) / s;
-	// 		} else if (m.yy > m.zz) {
-	// 			float s = 2.0f * Math::Sqrt( 1.0f + m.yy - m.xx - m.zz);
-	// 			w = (m.zx - m.xz ) / s;
-	// 			x = (m.yx + m.xy ) / s;
-	// 			y = 0.25f * s;
-	// 			z = (m.zy + m.yz ) / s;
-	// 		} else {
-	// 			float s = 2.0f * Math::Sqrt( 1.0f + m.zz - m.xx - m.yy );
-	// 			w = (m.xy - m.yx ) / s;
-	// 			x = (m.zx + m.xz ) / s;
-	// 			y = (m.zy + m.yz ) / s;
-	// 			z = 0.25f * s;
-	// 		}
-	// 	}
-	// 	return quat(x,y,z,w).Normalized();
-	// }
-
-
     void RunItemCreation(CGameCtnEditorFree@ editor, CGameCtnAnchoredObject@ origItem) {
         auto lastItem = editor.Challenge.AnchoredObjects[editor.Challenge.AnchoredObjects.Length - 1];
         uint itemId = Dev::GetOffsetUint32(lastItem, 0x164);
@@ -169,95 +129,23 @@ namespace Repeat {
         mat4 back2 = back1 * internalTInv;
         mat4 back3 = back2 * itemOffsetInv;
 
-        array<vec3> positions = array<vec3>(nbRepetitions);
-        array<vec3> rotations = array<vec3>(nbRepetitions);
+        // array<vec3> positions = array<vec3>(nbRepetitions);
+        // array<vec3> rotations = array<vec3>(nbRepetitions);
 
         for (uint i = 0; i < nbRepetitions; i++) {
             base = base * worldIteration;
             baseRot = baseRot * wi_RotMat;
             auto m = base * back3;
-            // auto rotM = mat4::Inverse(itemToIterBaseRotInv * baseRot);
-            // auto rotM = mat4::Inverse(baseRot);
-            mat4 rotM;
 
             vec3 pos3 = (m * vec3()).xyz;
-            // auto m2 = mat4::Inverse(EulerToMat(ItemsEuler(origItem))) * mat4::Inverse(m) * mat4::Scale(vec3(1, 1, 1));
-            // auto m2 = rotM;
 
-            // rotM = mat4::Inverse(mat4::Translate(pos3 * -1.) * m);
-            // rotM = mat4::Inverse(mat4::Translate(pos3 * -1.) * m);
-            rotM = baseRot;
-            // rotM = rotM * mat4::Inverse(baseRot);
-            if ((rotM * vec3()).xyz.LengthSquared() > 0) {
-                throw('rotM not at 0');
-            }
-
-            float pitch = -Math::Atan2(rotM.zy, rotM.yy) + origItem.Pitch,
-                  roll = -Math::Asin(-rotM.xy) + origItem.Roll,
-                  yaw = -Math::Atan2(rotM.xz, rotM.xx) + origItem.Yaw;
-
-            auto origE = ItemsEuler(origItem) * vec3(1, 1, 1);
-            auto rotV = EulerFromRotationMatrix(rotM, 'XZY') * -1;
-            pitch = rotV.x;
-            yaw = rotV.y;
-            roll = rotV.z;
-
-            // auto nextRot = item_Rot + wi_Rot * (i + 1);
-            // pitch = nextRot.x;
-            // yaw = nextRot.y;
-            // roll = nextRot.z;
-
-            // if (m2.yx == 1. || m2.yx == -1.) {
-            //     yaw = Math::Atan2(m2.xz, m2.zz);
-            // } else {
-            //     yaw = Math::Atan2(-m2.zx, m2.xx);
-            //     roll = Math::Atan2(-m2.yz, m2.yy);
-            // }
-
-
-
-
-
-            /*
-            float sinPitch = -m2.yz;
-            float cosPitch = Math::Sqrt(1.0 - sinPitch ** 2);
-
-            if (cosPitch != 0.0) {
-                yaw = Math::Atan2(m2.zx, m2.zz);
-                pitch = Math::Atan2(sinPitch, cosPitch);
-                roll = Math::Atan2(-m2.yx, m2.yy);
-                trace('cosPitch != 0');
-            } else {
-                pitch = (sinPitch > 0. ? 1. : -1.) * 0.5f * Math::PI;
-                yaw = Math::Atan2(m2.zx, m2.xx);
-                roll = 0.0;
-            }
-            */
-
-
-            // float sy = vec2(m2.xx, m2.yx).Length();
-            // bool singular = 1e-6 > sy;
-            // if (singular) {
-            //     pitch = Math::Atan2(m2.zy, m2.zz);
-            //     yaw = Math::Atan2(-m2.zx, sy);
-            //     roll = Math::Atan2(m2.yx, m2.xx);
-            // } else {
-            //     pitch = Math::Atan2(-m2.yz, m2.yy);
-            //     yaw = Math::Atan2(-m2.zx, sy);
-            //     roll = 0;
-            // }
-
-
-
-            // positions.InsertLast(pos3);
-            // rotations.InsertLast(MatToEuler(m));
+            auto rotV = PitchYawRollFromRotationMatrix(baseRot);
+            // rotV = PitchYawRollFromRotationMatrix(m * mat4::Translate(pos3 * -1.));
             auto newItem = DuplicateAndAddItem(editor, origItem, false);
             newItem.AbsolutePositionInMap = pos3;
-            newItem.Pitch = pitch;
-            newItem.Yaw = yaw;
-            newItem.Roll = roll;
-            // newItem.Yaw = pyr.y;
-            // newItem.Roll = pyr.z;
+            newItem.Pitch = rotV.x;
+            newItem.Yaw = rotV.y;
+            newItem.Roll = rotV.z;
 
             // doenst work for more than like 10-12 items
             if (i % 10 == 0) {
@@ -265,12 +153,16 @@ namespace Repeat {
             }
         }
         UpdateNewlyAddedItems(editor);
+
+        editor.PluginMapType.AutoSave();
     }
 
 
     void DrawRepeatTab() {
         UI::TextWrapped("Copy and repeat items with a modification applied.");
         UI::TextWrapped("Ctrl+hover an item to select it for repetition.");
+        UI::TextWrapped("\\$f80Warning!\\$z This tool can cause crashes upon saving, especially if undoing objects placed via this method. However, autosaves seem to save fine (albeit sometimes with a bugged thumbnail). Please exercise caution. \\$8f0Completely reloading the map will remove the possibility of a crash due to these items!");
+        UI::TextWrapped("\\$f80Note:\\$z Shadow calculations might fail with a message about duplicate BlockIds -- if this happens, save and reload the map and it will be fixed.");
         CGameCtnAnchoredObject@ selected = null;
         if (lastPicked !is null) {
             @selected = lastPicked.AsItem();

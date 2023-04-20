@@ -102,8 +102,9 @@ vec3 EulerFromRotationMatrix(mat4 m, const string &in order) {
     return e;
 }
 
-
+#if DEV
 bool testRun = _RunEulerTests();
+#endif
 
 bool _RunEulerTests() {
     startnew(RunEulerTests);
@@ -171,4 +172,25 @@ bool RotMatriciesMatch(mat4 a, mat4 b) {
         return true;
     }
     return false;
+}
+
+
+
+
+// from threejs Euler.js -- order XZY then *-1 at the end
+vec3 PitchYawRollFromRotationMatrix(mat4 m) {
+    float m11 = m.xx, m12 = m.xy, m13 = m.xz,
+          m21 = m.yx, m22 = m.yy, m23 = m.yz,
+          m31 = m.zx, m32 = m.zy, m33 = m.zz
+    ;
+    vec3 e = vec3();
+    e.z = Math::Asin( - Math::Clamp( m12, -1.0, 1.0 ) );
+    if ( Math::Abs( m12 ) < 0.9999999 ) {
+        e.x = Math::Atan2( m32, m22 );
+        e.y = Math::Atan2( m13, m11 );
+    } else {
+        e.x = Math::Atan2( - m23, m33 );
+        e.y = 0;
+    }
+    return e * -1.;
 }
