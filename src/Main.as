@@ -5,35 +5,41 @@ void Main() {
     if (!UserHasPermissions) {
         NotifyWarning("This plugin requires the advanced map editor");
     } else {
-    //    startnew(MainCoro);
+        // nothing to do
     }
 }
 
+
+void OnDisabled() { Unload(); }
+void OnDestroyed() { Unload(); }
+void Unload() {
+// #if DEPENDENCY_MLHOOK
+//     MLHook::UnregisterMLHooksAndRemoveInjectedML();
+// #endif
+}
+
+
 bool IsInEditor = false;
+bool IsInCurrentPlayground = false;
+bool EnteringEditor = false;
 
 void RenderEarly() {
     if (!UserHasPermissions) return;
     auto editor = cast<CGameCtnEditorFree>(GetApp().Editor);
-    if (editor is null == IsInEditor) {
-        IsInEditor = !IsInEditor;
-    }
+    auto currPg = cast<CSmArenaClient>(GetApp().CurrentPlayground);
+    IsInCurrentPlayground = currPg !is null;
+
+    EnteringEditor = !IsInEditor;
+    IsInEditor = editor !is null;
+    EnteringEditor = EnteringEditor && IsInEditor;
+
+    if (EnteringEditor)
+        trace('Updating editor watchers.');
     UpdateEditorWatchers(editor);
+    if (EnteringEditor)
+        trace('Done updating editor watchers.');
 }
 
-// void MainCoro() {
-//     while (true) {
-//         yield();
-//         auto editor = cast<CGameCtnEditorFree>(GetApp().Editor);
-//         if (editor is null == IsInEditor) {
-//             IsInEditor = !IsInEditor;
-//         }
-//         if (!IsInEditor) {
-//             sleep(100);
-//             continue;
-//         }
-//         UpdateEditorWatchers();
-//     }
-// }
 
 void Notify(const string &in msg) {
     UI::ShowNotification(Meta::ExecutingPlugin().Name, msg);
@@ -65,8 +71,8 @@ void RenderMenu() {
 */
 void RenderInterface() {
     if (!UserHasPermissions) return;
-    if (!ShowWindow || !IsInEditor) return;
-    vec2 size = vec2(600, 400);
+    if (!ShowWindow || !IsInEditor || IsInCurrentPlayground) return;
+    vec2 size = vec2(600, 800);
     vec2 pos = (vec2(Draw::GetWidth(), Draw::GetHeight()) - size) / 2.;
     UI::SetNextWindowSize(int(size.x), int(size.y), UI::Cond::FirstUseEver);
     UI::SetNextWindowPos(int(pos.x), int(pos.y), UI::Cond::FirstUseEver);

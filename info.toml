@@ -7,3 +7,4 @@ version  = "0.3.1"
 [script]
 #__DEFINES__
 dependencies = ["Camera"]
+# optional_dependencies = ["MLHook"]

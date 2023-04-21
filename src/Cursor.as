@@ -161,9 +161,11 @@ vec3 lastPickedItemPos = vec3();
 EditorRotation@ lastPickedItemRot = EditorRotation(0, 0, 0);
 ReferencedNod@ lastPickedItem = null;
 
-void UpdatePickedItemProps() {
-    auto editor = cast<CGameCtnEditorFree>(GetApp().Editor);
-    if (editor is null) return;
+void UpdatePickedItemProps(CGameCtnEditorFree@ editor) {
+    if (editor is null) {
+        @lastPickedItem = null;
+        return;
+    }
     if (editor.PickedObject is null) return;
     auto po = editor.PickedObject;
     lastPickedItemName = po.ItemModel.IdName;

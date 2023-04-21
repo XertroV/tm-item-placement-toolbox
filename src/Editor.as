@@ -1,7 +1,7 @@
 void UpdateEditorWatchers(CGameCtnEditorFree@ editor) {
     if (S_CopyPickedItemRotation) CheckForPickedItem_CopyRotation();
     if (g_UseSnappedLoc) EnsureSnappedLoc();
-    UpdatePickedItemProps();
+    UpdatePickedItemProps(editor);
     Jitter_CheckNewItems();
     CheckPickedForRepetitionHelper(editor);
 }

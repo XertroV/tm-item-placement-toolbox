@@ -160,10 +160,10 @@ namespace Repeat {
     }
 
 
-    void DrawRepeatTab() {
+    void DrawRepeatTab(CGameCtnEditorFree@ editor) {
         UI::TextWrapped("Copy and repeat items with a modification applied.");
         UI::TextWrapped("Ctrl+hover an item to select it for repetition.");
-        UI::TextWrapped("\\$f80Warning!\\$z This tool can cause crashes upon saving, especially if undoing objects placed via this method. However, autosaves seem to save fine (albeit sometimes with a bugged thumbnail). Please exercise caution. \\$8f0Completely reloading the map will remove the possibility of a crash due to these items!");
+        UI::TextWrapped("\\$f80Warning!\\$z This tool uses an experimental method of item creation. \\$8f0I believe it is safe, including using undo,\\$z however, there is a risk of a crash upon saving. That said, autosaves seem to save fine (albeit sometimes with a bugged thumbnail). Please exercise caution. \\$8f0Completely reloading the map will remove the possibility of a crash due to these items!");
         UI::TextWrapped("\\$f80Note:\\$z Shadow calculations might fail with a message about duplicate BlockIds -- if this happens, save and reload the map and it will be fixed.");
         CGameCtnAnchoredObject@ selected = null;
         if (lastPicked !is null) {
@@ -218,19 +218,6 @@ namespace Repeat {
         if (lastPicked !is null) {
             DrawHelpers();
         }
-
-        auto app = GetApp();
-        auto editor = cast<CGameCtnEditorFree>(app.Editor);
-        auto map = editor.Challenge;
-        @tmpItem = lastPicked;
-        for (uint i = 0; i < map.AnchoredObjects.Length; i++) {
-            auto item = map.AnchoredObjects[i];
-            @lastPicked = ReferencedNod(item);
-            // UpdateMatricies();
-            // DrawHelpers();
-        }
-        @lastPicked = tmpItem;
-        UpdateMatricies();
 
         UI::Separator();
 
