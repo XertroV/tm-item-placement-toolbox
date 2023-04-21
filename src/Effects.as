@@ -9,7 +9,7 @@ int NbEffectsActive() {
 }
 
 
-void DrawItemEffects() {
+void DrawItemEffects(CGameCtnEditorFree@ editor) {
     UI::Text("Apply effects to newly placed items");
     UI::BeginTabBar("effects");
     if (UI::BeginTabItem("Filter Items", UI::TabItemFlags::Trailing)) {
@@ -27,6 +27,10 @@ void DrawItemEffects() {
     }
     if (UI::BeginTabItem("Dissociate")) {
         Draw_Effect_Dissociate();
+        UI::EndTabItem();
+    }
+    if (UI::BeginTabItem("Copy Skin/Color")) {
+        Draw_Effect_CopySkinColor(editor);
         UI::EndTabItem();
     }
     UI::EndTabBar();

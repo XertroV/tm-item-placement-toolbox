@@ -15,5 +15,14 @@
 
 0x120: is location initialized
 
+
+
+
+0x170: number of times skin has changed -- possible update method?
+
+0x98: ptr to skin (it is ref counted)
+
+
+
  */
 ;

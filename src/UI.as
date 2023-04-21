@@ -39,7 +39,7 @@ void DrawMainWindowInner() {
     }
 
     if (UI::BeginTabItem("Effects ("+NbEffectsActive()+")###eff-main-tab")) {
-        DrawItemEffects();
+        DrawItemEffects(editor);
         UI::EndTabItem();
     }
 
