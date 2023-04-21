@@ -2,26 +2,31 @@ void UpdateEditorWatchers(CGameCtnEditorFree@ editor) {
     if (S_CopyPickedItemRotation) CheckForPickedItem_CopyRotation();
     if (g_UseSnappedLoc) EnsureSnappedLoc();
     UpdatePickedItemProps(editor);
-    Jitter_CheckNewItems();
     CheckPickedForRepetitionHelper(editor);
+    Jitter_CheckNewItems();
 }
 
 
 
-void UpdateNewlyAddedItems(CGameCtnEditorFree@ editor) {
+void UpdateNewlyAddedItems(CGameCtnEditorFree@ editor, bool withRefresh_disabled = false) {
     auto pmt = cast<CSmEditorPluginMapType>(editor.PluginMapType);
     auto macroblock = pmt.GetMacroblockModelFromFilePath("Stadium\\Macroblocks\\LightSculpture\\Spring\\FlowerWhiteSmall.Macroblock.Gbx");
     trace('UpdateNewlyAddedItems macroblock is null: ' + (macroblock is null));
     auto placed = pmt.PlaceMacroblock_NoDestruction(macroblock, int3(0, 24, 0), CGameEditorPluginMap::ECardinalDirections::North);
     trace('UpdateNewlyAddedItems placed: ' + placed);
+
+    if (placed && withRefresh_disabled) {
+        // does not seem to do anything useful atm
+        // RefreshItemPosRot();
+    }
+
     bool removed = pmt.RemoveMacroblock(macroblock, int3(0, 24, 0), CGameEditorPluginMap::ECardinalDirections::North);
     trace('UpdateNewlyAddedItems removed: ' + removed);
 }
 
 
-// this is not save and occasionally results in crash-on-saves (but not autosaves)
-// idea 1: autosave after placing more items
-// idea 2: refactor to
+// when there are duplicate blockIds this is may not save and occasionally results in crash-on-saves (but not autosaves)
+//
 CGameCtnAnchoredObject@ DuplicateAndAddItem(CGameCtnEditorFree@ editor, CGameCtnAnchoredObject@ origItem, bool updateItemsAfter = false) {
         auto item = CGameCtnAnchoredObject();
         auto itemTy = Reflection::GetType("CGameCtnAnchoredObject");
@@ -42,7 +47,8 @@ CGameCtnAnchoredObject@ DuplicateAndAddItem(CGameCtnEditorFree@ editor, CGameCtn
         // Dev::SetOffset(item, 0x164, ni_ID);
         // this is some other ID, but gets set when you click 'save' and IDK what it does or matters for
         // Dev::SetOffset(item, 0x168, Dev::GetOffsetUint32(lastItem, 0x168) + diff);
-        // this is required to be set for picking to work correctly -- typically they're in the range of like 7k, but setting this to the new items ID doesn't seem to be a problem
+
+        // this is required to be set for picking to work correctly -- typically they're in the range of like 7k, but setting this to the new items ID doesn't seem to be a problem -- this is probs the block id, b/c we don't get any duplicate complaints when setting this value.
         Dev::SetOffset(item, 0x16c, ni_ID);
 
         if (updateItemsAfter) {
