@@ -18,7 +18,7 @@
 
 
 
-0x170: number of times skin has changed -- possible update method?
+0x170: number of times skin has changed -- possible update method? nope, incrementing doesn't seem to update items
 
 0x98: ptr to skin (it is ref counted)
 

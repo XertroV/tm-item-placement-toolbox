@@ -76,7 +76,7 @@ void Draw_Effect_Jitter() {
     UI::Separator();
     jitterRot = UI::Checkbox("Apply Rotation Jitter", jitterRot);
     AddSimpleTooltip("Apply a randomization to placed items' rotations");
-    jitterRotAmt = UI::InputFloat3("Rotation Jitter", jitterRotAmt);
+    jitterRotAmt = UI::InputAngles3("Rotation Jitter (Deg)", jitterRotAmt);
     AddSimpleTooltip("Rotation will have a random amount added to it, up to +/- the amount specified in radians.\nDefault limits: -3.141 to 3.141 (which is -180 deg to 180 deg)");
 }
 

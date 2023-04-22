@@ -10,8 +10,8 @@ void DrawItemCursorProps() {
     // this only works for blocks and is to do with freeblock positioning i think
     // g_UseSnappedLoc = UI::Checkbox("Force Snapped Location", g_UseSnappedLoc);
     auto cursor = editor.Cursor;
-    cursor.Pitch = UI::InputFloat("Pitch", cursor.Pitch, Math::PI / 24.);
-    cursor.Roll = UI::InputFloat("Roll", cursor.Roll, Math::PI / 24.);
+    cursor.Pitch = UI::InputFloat("Pitch (Rad)", cursor.Pitch, Math::PI / 24.);
+    cursor.Roll = UI::InputFloat("Roll (Rad)", cursor.Roll, Math::PI / 24.);
 
     if (UI::BeginCombo("Dir", tostring(cursor.Dir))) {
         for (uint i = 0; i < 4; i++) {
@@ -74,7 +74,7 @@ void DrawPickedItemProperties() {
 
     UI::Text("Name: " + item.ItemModel.IdName);
     UI::Text("Pos: " + item.AbsolutePositionInMap.ToString());
-    UI::Text("P,Y,R: " + EditorRotation(item.Pitch, item.Roll, item.Yaw).PYRToString());
+    UI::Text("P,Y,R (Rad): " + EditorRotation(item.Pitch, item.Roll, item.Yaw).PYRToString());
 
     // todo: nudge doesn't work
 #if DEV
