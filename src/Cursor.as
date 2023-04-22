@@ -76,6 +76,15 @@ void DrawPickedItemProperties() {
     UI::Text("Pos: " + item.AbsolutePositionInMap.ToString());
     UI::Text("P,Y,R (Rad): " + EditorRotation(item.Pitch, item.Roll, item.Yaw).PYRToString());
 
+
+    UI::AlignTextToFramePadding();
+    UI::Text("Edit Picked Item Properties");
+    UI::TextWrapped("\\$f80Warning!\\$z This (probably) will not work for the most recently placed item, and you (probably) MUST save and load the map for the changes to persist.");
+
+    item.AbsolutePositionInMap = UI::InputFloat3("Pos.##picked-item-pos", item.AbsolutePositionInMap);
+    SetItemRotations(item, UI::InputAngles3("Rot##picked-item-rot", GetItemRotations(item)));
+
+
     // todo: nudge doesn't work
 #if DEV
 #else

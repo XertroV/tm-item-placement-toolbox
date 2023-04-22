@@ -120,3 +120,18 @@ void SetItemPlacementMode(ItemMode mode) {
         warn("exception setting item placement mode: " + getExceptionInfo());
     }
 }
+
+
+vec3 GetItemRotations(CGameCtnAnchoredObject@ item) {
+    return vec3(
+        item.Pitch,
+        item.Yaw,
+        item.Roll
+    );
+}
+
+void SetItemRotations(CGameCtnAnchoredObject@ item, vec3 angles) {
+    item.Pitch = angles.x;
+    item.Yaw = angles.y;
+    item.Roll = angles.z;
+}
