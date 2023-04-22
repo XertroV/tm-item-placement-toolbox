@@ -315,6 +315,20 @@ void nvgCircleWorldPos(vec3 pos, vec4 col = vec4(1, .5, 0, 1)) {
     }
 }
 
+// void nvgCircleWorldPos(vec3 pos, vec4 col, vec4 strokeCol) {
+//     auto uv = Camera::ToScreen(pos);
+//     if (uv.z < 0) {
+//         nvg::BeginPath();
+//         nvg::FillColor(col);
+//         nvg::Circle(uv.xy, 8);
+//         nvg::Fill();
+//         nvg::ClosePath();
+        // nvg::StrokeColor(strokeCol);
+        // nvg::StrokeWidth(3);
+        // nvg::Stroke();
+//     }
+// }
+
 bool nvgWorldPosLastVisible = false;
 vec3 nvgLastWorldPos = vec3();
 

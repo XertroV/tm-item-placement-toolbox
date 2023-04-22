@@ -78,12 +78,16 @@ void DrawPickedItemProperties() {
 
 
     UI::AlignTextToFramePadding();
-    UI::Text("Edit Picked Item Properties");
+    UI::Text("Edit Picked Item Properties (Helper dot shows position)");
     UI::TextWrapped("\\$f80Warning!\\$z This (probably) will not work for the most recently placed item, and you (probably) MUST save and load the map for the changes to persist.");
 
     item.AbsolutePositionInMap = UI::InputFloat3("Pos.##picked-item-pos", item.AbsolutePositionInMap);
     SetItemRotations(item, UI::InputAngles3("Rot (Deg)##picked-item-rot", GetItemRotations(item)));
 
+    nvgCircleWorldPos(item.AbsolutePositionInMap);
+    nvg::StrokeColor(vec4(0, 1, 1, 1));
+    nvg::StrokeWidth(3);
+    nvg::Stroke();
 
     // todo: nudge doesn't work
 #if DEV
