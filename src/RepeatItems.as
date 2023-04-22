@@ -366,12 +366,12 @@ void nvgMoveToWorldPos(vec3 pos) {
     nvgWorldPosLastVisible = true;
 }
 
-void nvgDrawCoordHelpers(mat4 &in m) {
+void nvgDrawCoordHelpers(mat4 &in m, float size = 10.) {
     vec3 beforePos = nvgLastWorldPos;
     vec3 pos =  (m * vec3()).xyz;
-    vec3 up =   (m * (vec3(0,1,0) * 10)).xyz;
-    vec3 left = (m * (vec3(1,0,0) * 10)).xyz;
-    vec3 dir =  (m * (vec3(0,0,-1) * 10)).xyz;
+    vec3 up =   (m * (vec3(0,1,0) * size)).xyz;
+    vec3 left = (m * (vec3(1,0,0) * size)).xyz;
+    vec3 dir =  (m * (vec3(0,0,-1) * size)).xyz;
     nvgMoveToWorldPos(pos);
     nvgToWorldPos(up, cGreen);
     nvgMoveToWorldPos(pos);

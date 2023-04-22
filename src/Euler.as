@@ -194,3 +194,13 @@ vec3 PitchYawRollFromRotationMatrix(mat4 m) {
     }
     return e * -1.;
 }
+
+
+// From Rxelux's `mat4x` lib, modified
+mat4 EulerToMat(vec3 euler) {
+    // mat4 translation = mat4::Translate(position*-1);
+    mat4 pitch = mat4::Rotate(-euler.x,vec3(1,0,0));
+    mat4 yaw = mat4::Rotate(-euler.y,vec3(0,1,0));
+    mat4 roll = mat4::Rotate(-euler.z,vec3(0,0,1));
+    return mat4::Inverse(pitch*roll*yaw/* *translation */);
+}

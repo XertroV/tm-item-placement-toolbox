@@ -59,8 +59,7 @@ void DrawItemCursorProps() {
     DrawPickedItemProperties();
 }
 
-
-
+float cursorCoordHelpersSize = 10.;
 
 void DrawPickedItemProperties() {
     UI::Text("Picked Item Properties:");
@@ -88,6 +87,10 @@ void DrawPickedItemProperties() {
     nvg::StrokeColor(vec4(0, 1, 1, 1));
     nvg::StrokeWidth(3);
     nvg::Stroke();
+
+    cursorCoordHelpersSize = UI::InputFloat("Rot Helpers Size", cursorCoordHelpersSize);
+    nvgDrawCoordHelpers(mat4::Translate(item.AbsolutePositionInMap) * EulerToMat(GetItemRotations(item)), cursorCoordHelpersSize);
+
 
     // todo: nudge doesn't work
 #if DEV
