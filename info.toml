@@ -2,7 +2,7 @@
 name     = "Item Placement Toolbox"
 author   = "XertroV"
 category = "Map Editor"
-version  = "0.4.5"
+version  = "0.4.6"
 
 [script]
 #__DEFINES__
