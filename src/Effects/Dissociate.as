@@ -34,7 +34,8 @@ void Draw_Effect_Dissociate() {
     UI::TextWrapped("Selected Dissociation");
     UI::TextWrapped("This will dissociate all items that are associated with blocks that are currently selected using the Copy tool.\n\\$f80Note: does not work yet for items on free blocks (normal / ghost only).");
 
-    auto nbSelected = Dev::GetOffsetUint32(editor, 0xB58);
+    auto nbSelected = editor.PluginMapType.CopyPaste_GetSelectedCoordsCount();
+    // auto nbSelected = Dev::GetOffsetUint32(editor, 0xB58);
     if (nbSelected != lastNbSelected) {
         lastNbSelected = nbSelected;
         ResetSelectedCache();
@@ -42,6 +43,7 @@ void Draw_Effect_Dissociate() {
 
     UI::AlignTextToFramePadding();
     UI::Text("Currently Selected Regions: " + nbSelected);
+    UI::Text("Currently Selected Regions: " + editor.PluginMapType.CustomSelectionCoords.Length);
     UI::SameLine();
     UI::Text("Selected Items / Blocks: " + selectedItems.Length + " / " + selectedBlocks.Length);
     UI::SameLine();
@@ -68,21 +70,23 @@ array<CGameCtnBlock@> selectedBlocks;
 
 void UpdateNbSelectedItemsAndBlocks(CGameCtnEditorFree@ editor) {
     ResetSelectedCache();
+    auto selectedBufOffset = GetOffset("CGameCtnEditorFree", "CurrentSectorOutlineBox") + 0x78; // 0xB50 - 0xAD8
     // cache selected block coords
-    auto nbSelected = Dev::GetOffsetUint32(editor, 0xB58);
-    auto selectedBuf = Dev::GetOffsetNod(editor, 0xB50);
+    auto nbSelected = Dev::GetOffsetUint32(editor, selectedBufOffset + 0x8);
+    auto selectedBuf = Dev::GetOffsetNod(editor, selectedBufOffset);
     nat3 coord = nat3(0);
     for (uint i = 0; i < nbSelected; i++) {
-coord.x = Dev::GetOffsetUint32(selectedBuf, i * 0xC);
-coord.y = Dev::GetOffsetUint32(selectedBuf, i * 0xC + 0x4);
-coord.z = Dev::GetOffsetUint32(selectedBuf, i * 0xC + 0x8);
+        coord.x = Dev::GetOffsetUint32(selectedBuf, i * 0xC);
+        coord.y = Dev::GetOffsetUint32(selectedBuf, i * 0xC + 0x4);
+        coord.z = Dev::GetOffsetUint32(selectedBuf, i * 0xC + 0x8);
         selectedCoords[coord.ToString()] = true;
     }
     // find items with those coords
     auto map = editor.Challenge;
+    auto linkedBlockEntryOffset = GetOffset("CGameCtnAnchoredObject", "Scale") + 0x10;
     for (uint i = 0; i < map.AnchoredObjects.Length; i++) {
         auto item = map.AnchoredObjects[i];
-        auto linkedListEntry = Dev::GetOffsetNod(item, 0x90);
+        auto linkedListEntry = Dev::GetOffsetNod(item, linkedBlockEntryOffset);
         if (linkedListEntry is null && selectedCoords.Exists(item.BlockUnitCoord.ToString())) {
             selectedItems.InsertLast(item);
         } else if (linkedListEntry !is null) {
@@ -144,9 +148,10 @@ void RunDissociationOnSelected(CGameCtnEditorFree@ editor) {
 }
 
 bool DissociateItem(CGameCtnAnchoredObject@ item) {
-    auto linkedListEntry = Dev::GetOffsetNod(item, 0x90);
+    auto linkedBlockEntryOffset = GetOffset("CGameCtnAnchoredObject", "Scale") + 0x10;
+    auto linkedListEntry = Dev::GetOffsetNod(item, linkedBlockEntryOffset);
     if (linkedListEntry is null) return false;
-    Dev::SetOffset(item, 0x90, uint64(0));
+    Dev::SetOffset(item, linkedBlockEntryOffset, uint64(0));
     auto block = cast<CGameCtnBlock>(Dev::GetOffsetNod(linkedListEntry, 0x0));
     if (block !is null && g_SetBlockLocationOnDissociation) {
         item.BlockUnitCoord = block.Coord;

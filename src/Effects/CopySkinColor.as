@@ -1,12 +1,5 @@
 
-
-
-
-
-
-
-
-
+// Note: this is disabled in the UI atm pending further dev and hopefully refreshing
 
 
 void Draw_Effect_CopySkinColor(CGameCtnEditorFree@ editor) {
@@ -58,6 +51,7 @@ void CopySkinToAll(CGameCtnEditorFree@ editor, CGameCtnAnchoredObject@ origItem)
 
 void CopySkinToSelected(CGameCtnEditorFree@ editor, CGameCtnAnchoredObject@ item) {
     // UpdateNbSelectedItemsAndBlocks;
+    // todo
 }
 
 
@@ -65,12 +59,16 @@ void CopySkinToSelected(CGameCtnEditorFree@ editor, CGameCtnAnchoredObject@ item
 
 CSystemPackDesc@ _GetItemSkin(CGameCtnAnchoredObject@ item) {
     if (item is null) return null;
-    return cast<CSystemPackDesc>(Dev::GetOffsetNod(item, 0x98));
+    auto skinOffset = GetOffset("CGameCtnAnchoredObject", "Scale") + 0x18;
+    return cast<CSystemPackDesc>(Dev::GetOffsetNod(item, skinOffset));
 }
 
 void _SetItemSkin(CGameCtnAnchoredObject@ item, CSystemPackDesc@ skin) {
     if (item is null) return;
-    Dev::SetOffset(item, 0x98, skin);
+    auto skinOffset = GetOffset("CGameCtnAnchoredObject", "Scale") + 0x18;
+    Dev::SetOffset(item, skinOffset, skin);
+    // 0x158 + 0x18 = 0x170
+    auto skinCounterOffset = GetOffset("CGameCtnAnchoredObject", "ItemModel") + 0x18;
     // a counter that ++'s every time a skin is changed
-    Dev::SetOffset(item, 0x170, Dev::GetOffsetUint32(item, 0x170) + 1);
+    Dev::SetOffset(item, skinCounterOffset, Dev::GetOffsetUint32(item, skinCounterOffset) + 1);
 }

@@ -51,9 +51,6 @@ void DrawItemCursorProps() {
     }
     UI::EndDisabled();
 
-    // UI::Separator();
-    // vec3 pivot = Dev::GetOffsetVec3()
-
     UI::Separator();
 
     DrawPickedItemProperties();
@@ -89,6 +86,8 @@ void DrawPickedItemProperties() {
     nvg::Stroke();
 
     cursorCoordHelpersSize = UI::InputFloat("Rot Helpers Size", cursorCoordHelpersSize);
+
+    nvgToWorldPos(item.AbsolutePositionInMap);
     nvgDrawCoordHelpers(mat4::Translate(item.AbsolutePositionInMap) * EulerToMat(GetItemRotations(item)), cursorCoordHelpersSize);
 
 

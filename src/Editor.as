@@ -32,24 +32,28 @@ CGameCtnAnchoredObject@ DuplicateAndAddItem(CGameCtnEditorFree@ editor, CGameCtn
         auto itemTy = Reflection::GetType("CGameCtnAnchoredObject");
         auto itemModelMember = itemTy.GetMember("ItemModel");
         // trace('ItemModel offset: ' + itemModelMember.Offset);
-        auto ni_ID = Dev::GetOffsetUint32(item, 0x164);
+        auto nodIdOffset = itemModelMember.Offset + 0xC;
+        // todo:
+        if (nodIdOffset != 0x164) throw('0x164');
+        auto blockIdOffset = itemModelMember.Offset + 0x14;
+        // todo:
+        if (blockIdOffset != 0x16C) throw('0x16C');
 
-        auto lastItem = editor.Challenge.AnchoredObjects[editor.Challenge.AnchoredObjects.Length - 1];
+        // new item nod id
+        auto ni_ID = Dev::GetOffsetUint32(item, nodIdOffset);
 
+        // copy most of the bytes from the prior item -- excludes last 0x10 bytes: [nod id, some other id, block id]
         Dev_SetOffsetBytes(item, 0x0, Dev_GetOffsetBytes(origItem, 0x0, itemModelMember.Offset + 0x8));
+        // this is required to be set for picking to work correctly -- typically they're in the range of like 7k, but setting this to the new items ID doesn't seem to be a problem -- this is probs the block id, b/c we don't get any duplicate complaints when setting this value.
+        Dev::SetOffset(item, blockIdOffset, ni_ID);
+
+        // mark flying and add a reference, then add to list of items
         item.IsFlying = true;
         item.ItemModel.MwAddRef();
         editor.Challenge.AnchoredObjects.Add(item);
 
-        auto li_ID = Dev::GetOffsetUint32(lastItem, 0x164);
-        auto diff = ni_ID - li_ID;
-        // unnecessary, shouldn't have changed
-        // Dev::SetOffset(item, 0x164, ni_ID);
         // this is some other ID, but gets set when you click 'save' and IDK what it does or matters for
         // Dev::SetOffset(item, 0x168, Dev::GetOffsetUint32(lastItem, 0x168) + diff);
-
-        // this is required to be set for picking to work correctly -- typically they're in the range of like 7k, but setting this to the new items ID doesn't seem to be a problem -- this is probs the block id, b/c we don't get any duplicate complaints when setting this value.
-        Dev::SetOffset(item, 0x16c, ni_ID);
 
         if (updateItemsAfter) {
             UpdateNewlyAddedItems(editor);
@@ -134,4 +138,14 @@ void SetItemRotations(CGameCtnAnchoredObject@ item, vec3 angles) {
     item.Pitch = angles.x;
     item.Yaw = angles.y;
     item.Roll = angles.z;
+}
+
+vec3 GetItemPivot(CGameCtnAnchoredObject@ item) {
+    auto pivotOffset = GetOffset("CGameCtnAnchoredObject", "Scale") - 0xC;
+    auto pivotOffset2 = GetOffset("CGameCtnAnchoredObject", "AbsolutePositionInMap") + 0x30;
+    if (pivotOffset != pivotOffset2) {
+        NotifyWarning("Item.Pivot memory offset changed. Unsafe to use.");
+        throw("Item.Pivot memory offset changed. Unsafe to use.");
+    }
+    return Dev::GetOffsetVec3(item, pivotOffset);
 }

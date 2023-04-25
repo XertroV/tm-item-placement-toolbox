@@ -60,7 +60,7 @@ namespace Repeat {
         auto item = lastPicked !is null ? lastPicked.AsItem() : null;
         if (item !is null) {
             // pivot position
-            auto pivot = Dev::GetOffsetVec3(item, 0x74);
+            auto pivot = GetItemPivot(item);
             if (item.ItemModel.DefaultPlacementParam_Content.PivotPositions.Length > 0) {
                 pivot += item.ItemModel.DefaultPlacementParam_Content.PivotPositions[0];
             }
@@ -87,18 +87,12 @@ namespace Repeat {
         itemToIterBaseRotInv = mat4::Inverse(itemToIterBaseRot);
         worldIterationInv = mat4::Inverse(worldIteration);
         wi_RotMatInv = mat4::Inverse(wi_RotMat);
-        if (lastPicked is null || lastPicked.AsItem() is null) return;
-        // auto item = lastPicked.AsItem();
-        // startPos = item.AbsolutePositionInMap;
+        if (item is null) return;
 
-        // startPos = (itemToWorld * vec3()).xyz;
         startPos = (itemToWorld * vec3()).xyz;
         itemBase = (itemToWorld * itemOffset * vec3()).xyz;
         itemBaseMod = (itemToWorld * itemOffset * internalT * vec3()).xyz;
         basePos = (itemToWorld * itemOffset * internalT * itemToIterBase * vec3()).xyz;
-        // unItemFrame = mat4::Translate(startPos * -1) * mat4::Inverse(EulerToMat(startRot));
-
-
     }
 
     vec3 ItemsEuler(CGameCtnAnchoredObject@ item) {
@@ -119,10 +113,6 @@ namespace Repeat {
     }
 
     void RunItemCreation(CGameCtnEditorFree@ editor, CGameCtnAnchoredObject@ origItem) {
-        auto lastItem = editor.Challenge.AnchoredObjects[editor.Challenge.AnchoredObjects.Length - 1];
-        uint itemId = Dev::GetOffsetUint32(lastItem, 0x164);
-        uint someOtherId = Dev::GetOffsetUint32(lastItem, 0x168);
-        uint anotherId = Dev::GetOffsetUint32(lastItem, 0x16c);
         mat4 base = itemToWorld * itemOffset * internalT * itemToIterBase;
         mat4 baseRot = itemOffsetRot * internalTRot * itemToIterBaseRot;
         // mat4 baseRotInv = mat4::Inverse(internalTRot * itemToIterBaseRot);

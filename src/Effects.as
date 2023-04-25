@@ -29,10 +29,11 @@ void DrawItemEffects(CGameCtnEditorFree@ editor) {
         Draw_Effect_Dissociate();
         UI::EndTabItem();
     }
-    if (UI::BeginTabItem("Copy Skin/Color")) {
-        Draw_Effect_CopySkinColor(editor);
-        UI::EndTabItem();
-    }
+    // disable this for now until better tested and refreshing working
+    // if (UI::BeginTabItem("Copy Skin/Color")) {
+    //     Draw_Effect_CopySkinColor(editor);
+    //     UI::EndTabItem();
+    // }
     UI::EndTabBar();
 }
 
