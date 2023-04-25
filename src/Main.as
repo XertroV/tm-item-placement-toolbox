@@ -4,9 +4,9 @@ void Main() {
     UserHasPermissions = Permissions::OpenAdvancedMapEditor();
     if (!UserHasPermissions) {
         NotifyWarning("This plugin requires the advanced map editor");
-    } else {
-        // nothing to do
+        return;
     }
+    CheckAndSetGameVersionSafe();
 }
 
 
@@ -25,6 +25,7 @@ bool EnteringEditor = false;
 
 void RenderEarly() {
     if (!UserHasPermissions) return;
+    if (!GameVersionSafe) return;
     auto editor = cast<CGameCtnEditorFree>(GetApp().Editor);
     auto currPg = cast<CSmArenaClient>(GetApp().CurrentPlayground);
     IsInCurrentPlayground = currPg !is null;
@@ -32,10 +33,14 @@ void RenderEarly() {
     EnteringEditor = !IsInEditor;
     IsInEditor = editor !is null;
     EnteringEditor = EnteringEditor && IsInEditor;
+}
 
+void Render() {
+    if (!GameVersionSafe) return;
+    if (!UserHasPermissions) return;
     if (EnteringEditor)
         trace('Updating editor watchers.');
-    UpdateEditorWatchers(editor);
+    UpdateEditorWatchers(cast<CGameCtnEditorFree>(GetApp().Editor));
     if (EnteringEditor)
         trace('Done updating editor watchers.');
 }
@@ -61,6 +66,7 @@ const string MenuTitle = "\\$3f3" + PluginIcon + "\\$z " + Meta::ExecutingPlugin
 
 /** Render function called every frame intended only for menu items in `UI`. */
 void RenderMenu() {
+    if (!GameVersionSafe) return;
     if (!UserHasPermissions) return;
     if (UI::MenuItem(MenuTitle, "", ShowWindow)) {
         ShowWindow = !ShowWindow;
@@ -70,6 +76,7 @@ void RenderMenu() {
 /** Render function called every frame.
 */
 void RenderInterface() {
+    if (!GameVersionSafe) return;
     if (!UserHasPermissions) return;
     if (!ShowWindow || !IsInEditor || IsInCurrentPlayground) return;
     vec2 size = vec2(600, 800);
