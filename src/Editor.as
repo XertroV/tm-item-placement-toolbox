@@ -33,11 +33,9 @@ CGameCtnAnchoredObject@ DuplicateAndAddItem(CGameCtnEditorFree@ editor, CGameCtn
         auto itemModelMember = itemTy.GetMember("ItemModel");
         // trace('ItemModel offset: ' + itemModelMember.Offset);
         auto nodIdOffset = itemModelMember.Offset + 0xC;
-        // todo:
-        if (nodIdOffset != 0x164) throw('0x164');
+        // if (nodIdOffset != 0x164) throw('0x164');
         auto blockIdOffset = itemModelMember.Offset + 0x14;
-        // todo:
-        if (blockIdOffset != 0x16C) throw('0x16C');
+        // if (blockIdOffset != 0x16C) throw('0x16C');
 
         // new item nod id
         auto ni_ID = Dev::GetOffsetUint32(item, nodIdOffset);
