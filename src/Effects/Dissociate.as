@@ -43,7 +43,8 @@ void Draw_Effect_Dissociate() {
 
     UI::AlignTextToFramePadding();
     UI::Text("Currently Selected Regions: " + nbSelected);
-    UI::Text("Currently Selected Regions: " + editor.PluginMapType.CustomSelectionCoords.Length);
+    // this shows 0 always
+    // UI::Text("Currently Selected Regions: " + editor.PluginMapType.CustomSelectionCoords.Length);
     UI::SameLine();
     UI::Text("Selected Items / Blocks: " + selectedItems.Length + " / " + selectedBlocks.Length);
     UI::SameLine();

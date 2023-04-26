@@ -2,6 +2,7 @@ void UpdateEditorWatchers(CGameCtnEditorFree@ editor) {
     if (S_CopyPickedItemRotation) CheckForPickedItem_CopyRotation();
     if (g_UseSnappedLoc) EnsureSnappedLoc();
     UpdatePickedItemProps(editor);
+    UpdatePickedBlockProps(editor);
     CheckPickedForRepetitionHelper(editor);
     Jitter_CheckNewItems();
 }
@@ -146,4 +147,41 @@ vec3 GetItemPivot(CGameCtnAnchoredObject@ item) {
         throw("Item.Pivot memory offset changed. Unsafe to use.");
     }
     return Dev::GetOffsetVec3(item, pivotOffset);
+}
+
+
+uint16 FreeBlockPosOffset = GetOffset("CGameCtnBlock", "Dir") + 0x8;
+uint16 FreeBlockRotOffset = FreeBlockPosOffset + 0xC;
+
+vec3 GetBlockLocation(CGameCtnBlock@ block) {
+    if (int(block.CoordX) < 0) {
+        // free block mode
+        return Dev::GetOffsetVec3(block, FreeBlockPosOffset);
+    }
+    return vec3(
+        float(block.Coord.x) * 32.,
+        float(int(block.Coord.y) - 8.) * 8.,
+        float(block.Coord.z) * 32.
+    );
+}
+
+vec3 GetBlockRotation(CGameCtnBlock@ block) {
+    if (int(block.CoordX) < 0) {
+        // free block mode
+        auto ypr = Dev::GetOffsetVec3(block, FreeBlockRotOffset);
+        return vec3(ypr.y, ypr.x, ypr.z);
+    }
+    return vec3(0, CardinalDirectionToYaw(int(block.Dir)), 0);
+}
+
+float CardinalDirectionToYaw(int dir) {
+    if (dir == int(CGameCursorBlock::ECardinalDirEnum::East))
+        return Math::PI * 3. / 2.;
+    else if (dir == int(CGameCursorBlock::ECardinalDirEnum::South))
+        return Math::PI;
+    else if (dir == int(CGameCursorBlock::ECardinalDirEnum::West))
+        return Math::PI / 2.;
+    else if (dir == int(CGameCursorBlock::ECardinalDirEnum::North))
+        return 0;
+    return 0;
 }

@@ -54,7 +54,30 @@ void DrawItemCursorProps() {
     UI::Separator();
 
     DrawPickedItemProperties();
+    DrawPickedBlockPoints();
 }
+
+
+[Setting hidden]
+bool S_DrawPickedBlockHelpers = false;
+
+
+void DrawPickedBlockPoints() {
+    if (lastPickedBlock is null) return;
+    UI::Separator();
+    UI::Text("P Block Pos: " + lastPickedBlockPos.ToString());
+    UI::Text("P Block Rot: " + lastPickedBlockRot.ToString());
+    S_DrawPickedBlockHelpers = UI::Checkbox("Draw picked block rotation helpers", S_DrawPickedBlockHelpers);
+    if (S_DrawPickedBlockHelpers) {
+        auto pos = lastPickedBlockPos;
+        auto rot = lastPickedBlockRot;
+        auto m = mat4::Translate(pos) * EulerToMat(rot);
+        nvg::StrokeWidth(3);
+        nvgMoveToWorldPos(pos);
+        nvgDrawCoordHelpers(m);
+    }
+}
+
 
 float cursorCoordHelpersSize = 10.;
 
@@ -187,6 +210,24 @@ void UpdatePickedItemProps(CGameCtnEditorFree@ editor) {
     lastPickedItemPos = po.AbsolutePositionInMap;
     @lastPickedItemRot = EditorRotation(po.Pitch, po.Roll, po.Yaw);
     @lastPickedItem = ReferencedNod(po);
+}
+
+string lastPickedBlockName;
+vec3 lastPickedBlockPos = vec3();
+vec3 lastPickedBlockRot = vec3();
+ReferencedNod@ lastPickedBlock = null;
+
+void UpdatePickedBlockProps(CGameCtnEditorFree@ editor) {
+    if (editor is null) {
+        @lastPickedBlock = null;
+        return;
+    }
+    if (editor.PickedBlock is null) return;
+    auto pb = editor.PickedBlock;
+    lastPickedBlockName = pb.BlockInfo.Name;
+    lastPickedBlockPos = GetBlockLocation(pb);
+    lastPickedBlockRot = GetBlockRotation(pb);
+    @lastPickedBlock = ReferencedNod(pb);
 }
 
 

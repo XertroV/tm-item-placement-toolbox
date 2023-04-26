@@ -124,7 +124,7 @@ namespace Repeat {
         // array<vec3> positions = array<vec3>(nbRepetitions);
         // array<vec3> rotations = array<vec3>(nbRepetitions);
 
-        for (uint i = 0; i < nbRepetitions; i++) {
+        for (int i = 0; i < nbRepetitions; i++) {
             base = base * worldIteration;
             baseRot = baseRot * wi_RotMat;
             auto m = base * back3;
@@ -261,7 +261,7 @@ namespace Repeat {
         mat4 back2 = back1 * internalTInv;
         mat4 back3 = back2 * itemOffsetInv;
 
-        for (uint i = 0; i < nbRepetitions; i++) {
+        for (int i = 0; i < nbRepetitions; i++) {
             base = base * worldIteration;
             vec3 pos0 = (base * vec3()).xyz;
             vec3 pos1 = (base * back1 * vec3()).xyz;
@@ -401,5 +401,9 @@ class ReferencedNod {
 
     CGameCtnAnchoredObject@ AsItem() {
         return cast<CGameCtnAnchoredObject>(this.nod);
+    }
+
+    CGameCtnBlock@ AsBlock() {
+        return cast<CGameCtnBlock>(this.nod);
     }
 }
