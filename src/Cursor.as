@@ -75,6 +75,7 @@ void DrawPickedBlockPoints() {
         nvg::StrokeWidth(3);
         nvgMoveToWorldPos(pos);
         nvgDrawCoordHelpers(m);
+        // nvgDrawCoordHelpers(m * mat4::Translate(vec3(16, 2, 16)));
     }
 }
 
