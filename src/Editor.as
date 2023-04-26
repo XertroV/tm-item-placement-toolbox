@@ -149,7 +149,6 @@ vec3 GetItemPivot(CGameCtnAnchoredObject@ item) {
     return Dev::GetOffsetVec3(item, pivotOffset);
 }
 
-
 uint16 FreeBlockPosOffset = GetOffset("CGameCtnBlock", "Dir") + 0x8;
 uint16 FreeBlockRotOffset = FreeBlockPosOffset + 0xC;
 
@@ -158,14 +157,11 @@ vec3 GetBlockLocation(CGameCtnBlock@ block) {
         // free block mode
         return Dev::GetOffsetVec3(block, FreeBlockPosOffset);
     }
-    // todo: using the coord will not give you a consistent corner of the block (i.e., after rotation)
-    return vec3(
-        float(block.Coord.x) * 32.,
-        float(int(block.Coord.y) - 8.) * 8.,
-        float(block.Coord.z) * 32.
-    ) + vec3(16., 4., 16.);
-    // the following returns a point above the block (like in the middle of the volume for that block coord)
-    // return editor.PluginMapType.GetVec3FromCoord(editor.PickedBlock.Coord);
+    // using the coord will not give you a consistent corner of the block (i.e., after rotation), so rotate around the midpoint to get the right position
+    auto pos = CoordToPos(block.Coord);
+    auto size = GetBlockSize(block);
+    auto rot = GetBlockRotation(block);
+    return (mat4::Translate(pos) * mat4::Translate(size / 2.) * EulerToMat(rot) * (size / -2.)).xyz;
 }
 
 vec3 GetBlockRotation(CGameCtnBlock@ block) {
@@ -177,7 +173,6 @@ vec3 GetBlockRotation(CGameCtnBlock@ block) {
     return vec3(0, CardinalDirectionToYaw(int(block.Dir)), 0);
 }
 
-// Need to check this -- taken from EditorRotations but seems to be flipped in X
 float CardinalDirectionToYaw(int dir) {
     // n:0, e:1, s:2, w:3
     return -Math::PI/2. * float(dir)  + Math::PI;
@@ -194,4 +189,12 @@ vec3 GetBlockSize(CGameCtnBlock@ block) {
     // mb use .VariantBaseX instead
     CGameCtnBlockInfoVariant@ biv = block.IsGround ? cast<CGameCtnBlockInfoVariant>(bi.VariantGround) : cast<CGameCtnBlockInfoVariant>(bi.VariantAir);
     return vec3(biv.Size.x * 32, biv.Size.y * 8, biv.Size.z * 32);
+}
+
+vec3 GetCtnBlockMidpoint(CGameCtnBlock@ block) {
+    return (GetBlockMatrix(block) * (GetBlockSize(block) / 2.)).xyz;
+}
+
+mat4 GetBlockMatrix(CGameCtnBlock@ block) {
+    return mat4::Translate(GetBlockLocation(block)) * EulerToMat(GetBlockRotation(block));
 }
