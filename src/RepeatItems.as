@@ -361,7 +361,7 @@ void nvgDrawCoordHelpers(mat4 &in m, float size = 10.) {
     vec3 pos =  (m * vec3()).xyz;
     vec3 up =   (m * (vec3(0,1,0) * size)).xyz;
     vec3 left = (m * (vec3(1,0,0) * size)).xyz;
-    vec3 dir =  (m * (vec3(0,0,-1) * size)).xyz;
+    vec3 dir =  (m * (vec3(0,0,1) * size)).xyz;
     nvgMoveToWorldPos(pos);
     nvgToWorldPos(up, cGreen);
     nvgMoveToWorldPos(pos);
@@ -369,6 +369,29 @@ void nvgDrawCoordHelpers(mat4 &in m, float size = 10.) {
     nvgMoveToWorldPos(pos);
     nvgToWorldPos(left, cRed);
     nvgMoveToWorldPos(beforePos);
+}
+
+void nvgDrawBlockBox(mat4 &in m, vec3 size) {
+    vec3 prePos = nvgLastWorldPos;
+    vec3 pos = (m * vec3()).xyz;
+    nvgMoveToWorldPos(pos);
+    nvgToWorldPos(pos);
+    nvgToWorldPos((m * (size * vec3(1, 0, 0))).xyz);
+    nvgToWorldPos((m * (size * vec3(1, 0, 1))).xyz);
+    nvgToWorldPos((m * (size * vec3(0, 0, 1))).xyz);
+    nvgToWorldPos(pos);
+    nvgToWorldPos((m * (size * vec3(0, 1, 0))).xyz);
+    nvgToWorldPos((m * (size * vec3(1, 1, 0))).xyz);
+    nvgToWorldPos((m * (size * vec3(1, 1, 1))).xyz);
+    nvgToWorldPos((m * (size * vec3(0, 1, 1))).xyz);
+    nvgToWorldPos((m * (size * vec3(0, 1, 0))).xyz);
+    nvgMoveToWorldPos((m * (size * vec3(1, 0, 0))).xyz);
+    nvgToWorldPos((m * (size * vec3(1, 1, 0))).xyz);
+    nvgMoveToWorldPos((m * (size * vec3(1, 0, 1))).xyz);
+    nvgToWorldPos((m * (size * vec3(1, 1, 1))).xyz);
+    nvgMoveToWorldPos((m * (size * vec3(0, 0, 1))).xyz);
+    nvgToWorldPos((m * (size * vec3(0, 1, 1))).xyz);
+    nvgMoveToWorldPos(prePos);
 }
 
 
