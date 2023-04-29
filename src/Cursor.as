@@ -7,6 +7,7 @@ void DrawItemCursorProps() {
     auto editor = cast<CGameCtnEditorFree>(GetApp().Editor);
     if (editor is null) return;
     S_CopyPickedItemRotation = UI::Checkbox("Copy Item Rotations from Picked Items (ctrl+hover)", S_CopyPickedItemRotation);
+    UI::Text("Cursor:");
     // this only works for blocks and is to do with freeblock positioning i think
     // g_UseSnappedLoc = UI::Checkbox("Force Snapped Location", g_UseSnappedLoc);
     auto cursor = editor.Cursor;
@@ -122,7 +123,7 @@ void DrawPickedItemProperties() {
     nvgToWorldPos(item.AbsolutePositionInMap);
     nvgDrawCoordHelpers(mat4::Translate(item.AbsolutePositionInMap) * EulerToMat(GetItemRotations(item)), cursorCoordHelpersSize);
 
-
+    return;
     // todo: nudge doesn't work
 #if DEV
 #else

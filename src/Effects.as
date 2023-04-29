@@ -70,14 +70,14 @@ void Draw_Effect_Jitter() {
     AddSimpleTooltip("Apply a randomization to placed items' locations");
     jitterPosOffset = UI::InputFloat3("Position Offset", jitterPosOffset);
     AddSimpleTooltip("Offset applied to position before jitter.");
-    jitterPosAmt = UI::InputFloat3("Position Radius Jitter", jitterPosAmt);
+    jitterPosAmt = UI::InputFloat3("Position Radius Jitter", jitterPosAmt); // , vec3(8, 1, 8)
     AddSimpleTooltip("Position will have a random amount added to it, up to +/- the amount specified.");
     // jitterPosSin = UI::Checkbox("Position Jitter - Sine Wave", jitterPosSin);
     // AddSimpleTooltip("Sine wave profile will be applied. More items will be clustered around the center.\n(Theta offset = 90, so technically cosine but yeah.)");
     UI::Separator();
     jitterRot = UI::Checkbox("Apply Rotation Jitter", jitterRot);
     AddSimpleTooltip("Apply a randomization to placed items' rotations");
-    jitterRotAmt = UI::InputAngles3("Rotation Jitter (Deg)", jitterRotAmt);
+    jitterRotAmt = UI::InputAngles3("Rotation Jitter (Deg)", jitterRotAmt, vec3(Math::PI));
     AddSimpleTooltip("Rotation will have a random amount added to it, up to +/- the amount specified in radians.\nDefault limits: -3.141 to 3.141 (which is -180 deg to 180 deg)");
 }
 

@@ -175,6 +175,13 @@
 // }
 
 
+vec3 ItemsEuler(CGameCtnAnchoredObject@ item) {
+    return vec3(
+        item.Pitch,
+        item.Yaw,
+        item.Roll
+    );
+}
 
 
 // from threejs Euler.js -- order XZY then *-1 at the end

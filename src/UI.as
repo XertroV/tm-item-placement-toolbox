@@ -206,6 +206,7 @@ void OnItemChanged() {
 
 void ResetTmpPlacement() {
     if (TmpPlacementParam !is null && TmpItemPlacementReplaced !is null) {
+        trace('resetting temporary item placement');
         @TmpItemPlacementReplaced.DefaultPlacementParam_Content = TmpPlacementParam;
         TmpPlacementParam.MwRelease();
         TmpItemPlacementReplaced.MwRelease();
