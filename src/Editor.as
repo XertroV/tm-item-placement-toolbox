@@ -28,35 +28,33 @@ void UpdateNewlyAddedItems(CGameCtnEditorFree@ editor, bool withRefresh = false)
 // when there are duplicate blockIds this is may not save and occasionally results in crash-on-saves (but not autosaves)
 //
 CGameCtnAnchoredObject@ DuplicateAndAddItem(CGameCtnEditorFree@ editor, CGameCtnAnchoredObject@ origItem, bool updateItemsAfter = false) {
-        auto item = CGameCtnAnchoredObject();
-        auto itemTy = Reflection::GetType("CGameCtnAnchoredObject");
-        auto itemModelMember = itemTy.GetMember("ItemModel");
-        // trace('ItemModel offset: ' + itemModelMember.Offset);
-        auto nodIdOffset = itemModelMember.Offset + 0xC;
-        // if (nodIdOffset != 0x164) throw('0x164');
-        auto blockIdOffset = itemModelMember.Offset + 0x14;
-        // if (blockIdOffset != 0x16C) throw('0x16C');
+    auto item = CGameCtnAnchoredObject();
+    auto itemTy = Reflection::GetType("CGameCtnAnchoredObject");
+    auto itemModelMember = itemTy.GetMember("ItemModel");
+    // trace('ItemModel offset: ' + itemModelMember.Offset);
+    auto nodIdOffset = itemModelMember.Offset + 0xC;
+    auto blockIdOffset = itemModelMember.Offset + 0x14;
 
-        // new item nod id
-        auto ni_ID = Dev::GetOffsetUint32(item, nodIdOffset);
+    // new item nod id
+    auto ni_ID = Dev::GetOffsetUint32(item, nodIdOffset);
 
-        // copy most of the bytes from the prior item -- excludes last 0x10 bytes: [nod id, some other id, block id]
-        Dev_SetOffsetBytes(item, 0x0, Dev_GetOffsetBytes(origItem, 0x0, itemModelMember.Offset + 0x8));
-        // this is required to be set for picking to work correctly -- typically they're in the range of like 7k, but setting this to the new items ID doesn't seem to be a problem -- this is probs the block id, b/c we don't get any duplicate complaints when setting this value.
-        Dev::SetOffset(item, blockIdOffset, ni_ID);
+    // copy most of the bytes from the prior item -- excludes last 0x10 bytes: [nod id, some other id, block id]
+    Dev_SetOffsetBytes(item, 0x0, Dev_GetOffsetBytes(origItem, 0x0, itemModelMember.Offset + 0x8));
+    // this is required to be set for picking to work correctly -- typically they're in the range of like 7k, but setting this to the new items ID doesn't seem to be a problem -- this is probs the block id, b/c we don't get any duplicate complaints when setting this value.
+    Dev::SetOffset(item, blockIdOffset, ni_ID);
 
-        // mark flying and add a reference, then add to list of items
-        item.IsFlying = true;
-        item.ItemModel.MwAddRef();
-        editor.Challenge.AnchoredObjects.Add(item);
+    // mark flying and add a reference, then add to list of items
+    item.IsFlying = true;
+    item.ItemModel.MwAddRef();
+    editor.Challenge.AnchoredObjects.Add(item);
 
-        // this is some other ID, but gets set when you click 'save' and IDK what it does or matters for
-        // Dev::SetOffset(item, 0x168, Dev::GetOffsetUint32(lastItem, 0x168) + diff);
+    // this is some other ID, but gets set when you click 'save' and IDK what it does or matters for
+    // Dev::SetOffset(item, 0x168, Dev::GetOffsetUint32(lastItem, 0x168) + diff);
 
-        if (updateItemsAfter) {
-            UpdateNewlyAddedItems(editor);
-        }
-        return item;
+    if (updateItemsAfter) {
+        UpdateNewlyAddedItems(editor);
+    }
+    return item;
 }
 
 
@@ -112,7 +110,7 @@ ItemMode GetItemPlacementMode() {
         // ButtonSubModeFreeItem
         if (cast<CControlButton>(btns.Childs[2]).IsSelected) return ItemMode::Free;
     } catch {
-        trace("Exception getting item placement mode: " + getExceptionInfo());
+        NotifyWarning("Exception getting item placement mode: " + getExceptionInfo());
     }
     return ItemMode::None;
 }

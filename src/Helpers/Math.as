@@ -14,4 +14,20 @@ namespace Math {
     vec3 ToRad(vec3 degs) {
         return vec3(ToRad(degs.x), ToRad(degs.y), ToRad(degs.z));
     }
+
+    vec3 Max(vec3 a, vec3 b) {
+        return vec3(
+            Math::Max(a.x, b.x),
+            Math::Max(a.y, b.y),
+            Math::Max(a.z, b.z)
+        );
+    }
+
+    vec3 Min(vec3 a, vec3 b) {
+        return vec3(
+            Math::Min(a.x, b.x),
+            Math::Min(a.y, b.y),
+            Math::Min(a.z, b.z)
+        );
+    }
 }

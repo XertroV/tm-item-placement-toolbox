@@ -13,3 +13,26 @@ void Dev_SetOffsetBytes(CMwNod@ nod, uint offset, uint64[]@ bs) {
     }
     return;
 }
+
+
+class ReferencedNod {
+    CMwNod@ nod;
+
+    ReferencedNod(CMwNod@ _nod) {
+        @nod = _nod;
+        nod.MwAddRef();
+    }
+
+    ~ReferencedNod() {
+        nod.MwRelease();
+        @nod = null;
+    }
+
+    CGameCtnAnchoredObject@ AsItem() {
+        return cast<CGameCtnAnchoredObject>(this.nod);
+    }
+
+    CGameCtnBlock@ AsBlock() {
+        return cast<CGameCtnBlock>(this.nod);
+    }
+}
