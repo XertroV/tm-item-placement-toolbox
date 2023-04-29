@@ -108,7 +108,7 @@ void Jitter_CheckNewItems() {
             auto item = editor.Challenge.AnchoredObjects[i];
             ApplyJitter(item);
         }
-        // RefreshJittered();
+        RefreshBlocksAndItems(editor);
     }
 }
 
@@ -127,15 +127,4 @@ void ApplyJitter(ref@ _r) {
         item.Roll += rotMod.z;
         trace(rotMod.ToString());
     }
-
-    // item.IsLocationInitialised = false;
-    // item.IsLocationInitialised = true;
-    // sleep(1000);
-    // item.IsLocationInitialised = true;
-
 }
-
-// void RefreshJittered() {
-//     auto editor = cast<CGameCtnEditorFree>(GetApp().Editor);
-//     UpdateNewlyAddedItems(editor, true);
-// }

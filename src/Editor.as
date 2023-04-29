@@ -9,17 +9,16 @@ void UpdateEditorWatchers(CGameCtnEditorFree@ editor) {
 
 
 
-void UpdateNewlyAddedItems(CGameCtnEditorFree@ editor, bool withRefresh_disabled = false) {
+void UpdateNewlyAddedItems(CGameCtnEditorFree@ editor, bool withRefresh = false) {
     auto pmt = cast<CSmEditorPluginMapType>(editor.PluginMapType);
     auto macroblock = pmt.GetMacroblockModelFromFilePath("Stadium\\Macroblocks\\LightSculpture\\Spring\\FlowerWhiteSmall.Macroblock.Gbx");
     trace('UpdateNewlyAddedItems macroblock is null: ' + (macroblock is null));
     auto placed = pmt.PlaceMacroblock_NoDestruction(macroblock, int3(0, 24, 0), CGameEditorPluginMap::ECardinalDirections::North);
     trace('UpdateNewlyAddedItems placed: ' + placed);
 
-    if (placed && withRefresh_disabled) {
-        // does not seem to do anything useful atm
-        // RefreshItemPosRot();
-    }
+    // if (placed && withRefresh) {
+    //     RefreshBlocksAndItems(editor);
+    // }
 
     bool removed = pmt.RemoveMacroblock(macroblock, int3(0, 24, 0), CGameEditorPluginMap::ECardinalDirections::North);
     trace('UpdateNewlyAddedItems removed: ' + removed);
@@ -63,24 +62,32 @@ CGameCtnAnchoredObject@ DuplicateAndAddItem(CGameCtnEditorFree@ editor, CGameCtn
 
 
 void RefreshItemPosRot() {
-    // very hacky method: basically cut the whole map and ctrl+z it.
     auto app = cast<CGameManiaPlanet>(GetApp());
     auto editor = cast<CGameCtnEditorFree>(app.Editor);
+    RefreshBlocksAndItems(editor);
 
-    // save and restore item placement mode
-    auto mode = GetItemPlacementMode();
-    // don't do anything if we're not in an item mode
-    if (mode == ItemMode::None) return;
+    // // very hacky method: basically cut the whole map and ctrl+z it.
+    // // save and restore item placement mode
+    // auto mode = GetItemPlacementMode();
+    // // don't do anything if we're not in an item mode
+    // if (mode == ItemMode::None) return;
 
-    editor.SweepObjectsAndSave();
-    // yield();
-    /* alt impl -- much slower than sweep objects
-    editor.ButtonSelectionBoxSelectAllOnClick();
-    editor.PluginMapType.CopyPaste_Cut();
-    editor.PluginMapType.Undo();
-    */
-    editor.PluginMapType.Undo();
-    SetItemPlacementMode(mode);
+    // editor.SweepObjectsAndSave();
+    // // yield();
+    // /* alt impl -- much slower than sweep objects
+    // editor.ButtonSelectionBoxSelectAllOnClick();
+    // editor.PluginMapType.CopyPaste_Cut();
+    // editor.PluginMapType.Undo();
+    // */
+    // editor.PluginMapType.Undo();
+    // SetItemPlacementMode(mode);
+}
+
+void RefreshBlocksAndItems(CGameCtnEditorFree@ editor) {
+    auto pmt = editor.PluginMapType;
+    pmt.AutoSave();
+    pmt.Undo();
+    pmt.Redo();
 }
 
 
