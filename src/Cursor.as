@@ -203,7 +203,9 @@ void DrawPickedItemProperties(CGameCtnEditorFree@ editor) {
     DrawNudgeFor(item);
 
     UI::Separator();
-    UI::TextWrapped("Relative Position Calculator (useful for static respawns)");
+    UI::TextWrapped("Relative/Absolute Position Calculator (useful for static respawns)");
+    UI::Separator();
+    UI::Text("Absolute to Relative");
     m_Calc_AbsPosition = UI::InputFloat3("Absolute Position", m_Calc_AbsPosition);
     UI::SameLine();
     if (UI::Button("Reset###clac-abs-position")) {
@@ -211,14 +213,23 @@ void DrawPickedItemProperties(CGameCtnEditorFree@ editor) {
     }
     auto m = GetItemMatrix(item);
     vec3 relPos = (mat4::Inverse(m) * m_Calc_AbsPosition).xyz;
-    UI::Text("Relative Position: " + relPos.ToString());
-    if (UI::IsItemClicked()) {
-        SetClipboard(relPos.ToString());
+    CopiableLabeledValue("Relative Position", relPos.ToString());
+
+    UI::Separator();
+    UI::Text("Relative to Absolute");
+
+    m_Calc_RelPosition = UI::InputFloat3("Relative Position", m_Calc_RelPosition);
+    UI::SameLine();
+    if (UI::Button("Reset###clac-rel-position")) {
+        m_Calc_RelPosition = vec3();
     }
+    vec3 absPos = (m * m_Calc_RelPosition).xyz;
+    CopiableLabeledValue("Absolute Position", absPos.ToString());
 }
 
 
 vec3 m_Calc_AbsPosition = vec3();
+vec3 m_Calc_RelPosition = vec3();
 
 
 // draw last as can invalidate item/block reference

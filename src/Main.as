@@ -124,3 +124,14 @@ void SetClipboard(const string &in msg) {
     IO::SetClipboard(msg);
     Notify("Copied: " + msg);
 }
+
+bool ClickableLabel(const string &in label, const string &in value, const string &in between = ": ") {
+    UI::Text(label + between + value);
+    return UI::IsItemClicked();
+}
+
+void CopiableLabeledValue(const string &in label, const string &in value) {
+    if (ClickableLabel(label, value)) {
+        SetClipboard(value);
+    }
+}
