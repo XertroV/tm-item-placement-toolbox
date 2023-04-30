@@ -58,7 +58,6 @@ CGameCtnAnchoredObject@ DuplicateAndAddItem(CGameCtnEditorFree@ editor, CGameCtn
 }
 
 
-
 void RefreshItemPosRot() {
     auto app = cast<CGameManiaPlanet>(GetApp());
     auto editor = cast<CGameCtnEditorFree>(app.Editor);
@@ -158,7 +157,7 @@ uint16 FreeBlockPosOffset = GetOffset("CGameCtnBlock", "Dir") + 0x8;
 uint16 FreeBlockRotOffset = FreeBlockPosOffset + 0xC;
 
 vec3 GetBlockLocation(CGameCtnBlock@ block) {
-    if (int(block.CoordX) < 0) {
+    if (IsBlockFree(block)) {
         // free block mode
         return Dev::GetOffsetVec3(block, FreeBlockPosOffset);
     }
@@ -183,8 +182,17 @@ vec3 GetBlockLocation(CGameCtnBlock@ block) {
     return (mat4::Translate(pos) * mat4::Translate(sqSize / 2.) * EulerToMat(rot) * (sqSize / -2.)).xyz;
 }
 
+void SetBlockLocation(CGameCtnBlock@ block, vec3 pos) {
+    if (IsBlockFree(block)) {
+        Dev::SetOffset(block, FreeBlockPosOffset, pos);
+    } else {
+        // not supported
+        warn('not yet supported: set block location for non-free block');
+    }
+}
+
 vec3 GetBlockRotation(CGameCtnBlock@ block) {
-    if (int(block.CoordX) < 0) {
+    if (IsBlockFree(block)) {
         // free block mode
         auto ypr = Dev::GetOffsetVec3(block, FreeBlockRotOffset);
         return vec3(ypr.y, ypr.x, ypr.z);
@@ -192,9 +200,28 @@ vec3 GetBlockRotation(CGameCtnBlock@ block) {
     return vec3(0, CardinalDirectionToYaw(int(block.Dir)), 0);
 }
 
+void SetBlockRotation(CGameCtnBlock@ block, vec3 euler) {
+    if (int(block.CoordX) < 0) {
+        // free block mode
+        auto ypr = vec3(euler.y, euler.x, euler.z);
+        Dev::SetOffset(block, FreeBlockRotOffset, ypr);
+    } else {
+        block.BlockDir = CGameCtnBlock::ECardinalDirections(YawToCardinalDirection(euler.y));
+    }
+}
+
+bool IsBlockFree(CGameCtnBlock@ block) {
+    return int(block.CoordX) < 0;
+}
+
 float CardinalDirectionToYaw(int dir) {
     // n:0, e:1, s:2, w:3
     return -Math::PI/2. * float(dir) + (dir >= 2 ? Math::PI*2 : 0);
+}
+
+int YawToCardinalDirection(float yaw) {
+    int dir = int(Math::Floor(-yaw / Math::PI * 2.));
+    return dir % 4;
 }
 
 vec3 Nat3ToVec3(nat3 coord) {

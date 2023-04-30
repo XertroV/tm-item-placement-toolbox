@@ -2,6 +2,9 @@ namespace Repeat {
     ReferencedNod@ lastPicked = null;
     ReferencedNod@ tmpItem = null;
 
+    [Setting hidden]
+    bool S_ShowRepeatHelpers = true;
+
     CGameCtnAnchoredObject@ GetPickedItem() {
         return lastPicked !is null ? lastPicked.AsItem() : null;
     }
@@ -24,6 +27,8 @@ namespace Repeat {
             @selected = lastPicked.AsItem();
         }
         UI::Text("Curr Item: " + (selected is null ? "None" : string(selected.ItemModel.IdName)));
+        // bad idea to let user disable them b/c there's no signal about what is active / will be done
+        // S_ShowRepeatHelpers = UI::Checkbox("Show Helpers", S_ShowRepeatHelpers);
 
         UI::Separator();
 
@@ -133,10 +138,10 @@ namespace Repeat {
                 newItem.Yaw = rotV.y;
                 newItem.Roll = rotV.z;
 
-                // doenst work for more than like 10-12 items
-                if (i % 10 == 0) {
-                    UpdateNewlyAddedItems(editor);
-                }
+                // // doenst work for more than like 10-12 items
+                // if (i % 10 == 0) {
+                //     UpdateNewlyAddedItems(editor);
+                // }
             }
             UpdateNewlyAddedItems(editor);
             editor.PluginMapType.AutoSave();
@@ -207,6 +212,9 @@ namespace Repeat {
         void DrawHelpers() {
             auto item = lastPicked.AsItem();
             if (item is null) return;
+
+            if (!Repeat::S_ShowRepeatHelpers) return;
+
             nvg::Reset();
 
             nvgCircleWorldPos(startPos);
@@ -330,10 +338,10 @@ class RepeatMethod {
                 newItem.Yaw = rotV.y;
                 newItem.Roll = rotV.z;
 
-                // doenst work for more than like 10-12 items
-                if (i % 10 == 0) {
-                    UpdateNewlyAddedItems(editor);
-                }
+                // // doenst work for more than like 10-12 items
+                // if (i % 10 == 0) {
+                //     UpdateNewlyAddedItems(editor);
+                // }
             }
             UpdateNewlyAddedItems(editor);
             editor.PluginMapType.AutoSave();
@@ -343,9 +351,13 @@ class RepeatMethod {
 
     }
     void DrawHelpers(bool withLinesBetween) {
+        if (!Repeat::S_ShowRepeatHelpers) return;
+        nvg::Reset();
+        nvg::BeginPath();
         for (uint i = 0; i < matricies.Length; i++) {
             nvgDrawCoordHelpers(matricies[i]);
         }
+        nvg::ClosePath();
     }
 }
 

@@ -43,8 +43,18 @@ void DrawMainWindowInner() {
         UI::EndTabItem();
     }
 
-    if (UI::BeginTabItem("Item Properties")) {
+    if (UI::BeginTabItem("Cursor")) {
         DrawItemCursorProps();
+        UI::EndTabItem();
+    }
+
+    if (UI::BeginTabItem("Edit Item")) {
+        DrawEditItemTab();
+        UI::EndTabItem();
+    }
+
+    if (UI::BeginTabItem("Edit Block")) {
+        DrawEditBlockTab();
         UI::EndTabItem();
     }
 

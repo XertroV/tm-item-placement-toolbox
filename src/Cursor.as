@@ -51,10 +51,14 @@ void DrawItemCursorProps() {
         //
     }
     UI::EndDisabled();
+}
 
-    UI::Separator();
 
+void DrawEditItemTab() {
     DrawPickedItemProperties();
+}
+
+void DrawEditBlockTab() {
     DrawPickedBlockPoints();
 }
 
@@ -66,11 +70,20 @@ bool S_DrawPickedBlockBox = false;
 
 
 void DrawPickedBlockPoints() {
-    if (lastPickedBlock is null) return;
-    UI::Separator();
-    UI::Text("P Block Coord: " + lastPickedBlockCoord.ToString());
-    UI::Text("P Block Pos: " + lastPickedBlockPos.ToString());
-    UI::Text("P Block Rot: " + lastPickedBlockRot.ToString());
+    UI::Text("Picked Block Properties:");
+
+    if (lastPickedBlock is null) {
+        UI::Text("No picked block. ctrl+hover to pick a block.");
+        return;
+    }
+    auto block = lastPickedBlock.AsBlock();
+
+    // if (IsBlockFree(block)) {
+    //     UI::InputFloat3("Pos", )
+    // }
+    UI::Text("Block Coord: " + lastPickedBlockCoord.ToString());
+    UI::Text("Block Pos: " + lastPickedBlockPos.ToString());
+    UI::Text("Block Rot: " + lastPickedBlockRot.ToString());
     S_DrawPickedBlockHelpers = UI::Checkbox("Draw picked block rotation helpers", S_DrawPickedBlockHelpers);
     S_DrawPickedBlockBox = UI::Checkbox("Draw picked block box", S_DrawPickedBlockBox);
     auto pos = lastPickedBlockPos;
@@ -86,6 +99,11 @@ void DrawPickedBlockPoints() {
         nvgDrawCoordHelpers(m);
         // nvgDrawCoordHelpers(m * mat4::Translate(vec3(16, 2, 16)));
     }
+    if (IsBlockFree(block)) {
+        DrawNudgeFor(block);
+    } else {
+        UI::Text("Cannot nudge non-free blocks.");
+    }
 }
 
 
@@ -95,7 +113,7 @@ void DrawPickedItemProperties() {
     UI::Text("Picked Item Properties:");
 
     if (lastPickedItem is null) {
-        UI::Text("No item has been picked.");
+        UI::Text("No item has been picked. ctrl+hover to pick an item.");
         return;
     }
 
@@ -108,7 +126,7 @@ void DrawPickedItemProperties() {
 
     UI::AlignTextToFramePadding();
     UI::Text("Edit Picked Item Properties (Helper dot shows position)");
-    UI::TextWrapped("\\$f80Warning!\\$z This (probably) will not work for the most recently placed item, and you (probably) MUST save and load the map for the changes to persist.");
+    // UI::TextWrapped("\\$f80Warning!\\$z This (probably) will not work for the most recently placed item, and you (probably) MUST save and load the map for the changes to persist.");
 
     item.AbsolutePositionInMap = UI::InputFloat3("Pos.##picked-item-pos", item.AbsolutePositionInMap);
     SetItemRotations(item, UI::InputAngles3("Rot (Deg)##picked-item-rot", GetItemRotations(item)));
@@ -123,16 +141,15 @@ void DrawPickedItemProperties() {
     nvgToWorldPos(item.AbsolutePositionInMap);
     nvgDrawCoordHelpers(mat4::Translate(item.AbsolutePositionInMap) * EulerToMat(GetItemRotations(item)), cursorCoordHelpersSize);
 
-    return;
-    // todo: nudge doesn't work
-#if DEV
-#else
-    return;
-#endif
-
-
     UI::AlignTextToFramePadding();
     UI::Text("Nudge Picked Item:");
+
+    DrawNudgeFor(item);
+}
+
+void DrawNudgeFor(CMwNod@ nod) {
+    auto item = cast<CGameCtnAnchoredObject>(nod);
+    auto block = cast<CGameCtnBlock>(nod);
 
     vec3 itemPosMod = vec3();
     vec3 itemRotMod = vec3();
@@ -193,11 +210,37 @@ void DrawPickedItemProperties() {
     }
 
     if (itemPosMod.LengthSquared() > 0 || itemRotMod.LengthSquared() > 0) {
-        item.AbsolutePositionInMap += itemPosMod;
-        item.Pitch += itemRotMod.x;
-        item.Yaw += itemRotMod.y;
-        item.Roll += itemRotMod.z;
-        startnew(RefreshItemPosRot);
+        if (item !is null) {
+            item.AbsolutePositionInMap += itemPosMod;
+            item.Pitch += itemRotMod.x;
+            item.Yaw += itemRotMod.y;
+            item.Roll += itemRotMod.z;
+        } else if (block !is null) {
+            // todo
+            if (IsBlockFree(block)) {
+                SetBlockLocation(block, GetBlockLocation(block) + itemPosMod);
+                SetBlockRotation(block, GetBlockRotation(block) + itemRotMod);
+            } else {
+                warn('nudge non-free block');
+            }
+        } else {
+            warn("Unhandled nod type to nudge!!!");
+            if (nod !is null) {
+                warn("Type: " + Reflection::TypeOf(nod).Name);
+            }
+        }
+        // update and fix picked item (will be replaced)
+        auto editor = cast<CGameCtnEditorFree>(GetApp().Editor);
+        RefreshBlocksAndItems(editor);
+
+        if (item !is null) {
+            // the updated item will be the last item in the array and has a new pointer
+            // items that weren't updated keep the same pointer
+            @lastPickedItem = ReferencedNod(editor.Challenge.AnchoredObjects[editor.Challenge.AnchoredObjects.Length - 1]);
+        } else if (block !is null) {
+            @lastPickedBlock = ReferencedNod(editor.Challenge.Blocks[editor.Challenge.Blocks.Length - 1]);
+            UpdatePickedBlockCachedValues();
+        }
     }
 }
 
@@ -216,10 +259,15 @@ void UpdatePickedItemProps(CGameCtnEditorFree@ editor) {
     }
     if (editor.PickedObject is null) return;
     auto po = editor.PickedObject;
+    @lastPickedItem = ReferencedNod(po);
+    UpdatePickedItemCachedValues();
+}
+
+void UpdatePickedItemCachedValues() {
+    auto po = lastPickedItem.AsItem();
     lastPickedItemName = po.ItemModel.IdName;
     lastPickedItemPos = po.AbsolutePositionInMap;
     @lastPickedItemRot = EditorRotation(po.Pitch, po.Roll, po.Yaw);
-    @lastPickedItem = ReferencedNod(po);
 }
 
 string lastPickedBlockName;
@@ -236,12 +284,17 @@ void UpdatePickedBlockProps(CGameCtnEditorFree@ editor) {
     }
     if (editor.PickedBlock is null) return;
     auto pb = editor.PickedBlock;
+    @lastPickedBlock = ReferencedNod(pb);
+    UpdatePickedBlockCachedValues();
+}
+
+void UpdatePickedBlockCachedValues() {
+    auto pb = lastPickedBlock.AsBlock();
     lastPickedBlockName = pb.BlockInfo.Name;
     lastPickedBlockCoord = pb.Coord;
     lastPickedBlockPos = GetBlockLocation(pb);
     lastPickedBlockRot = GetBlockRotation(pb);
     lastPickedBlockSize = GetBlockSize(pb);
-    @lastPickedBlock = ReferencedNod(pb);
 }
 
 
