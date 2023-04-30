@@ -54,22 +54,23 @@ void DrawItemCursorProps() {
 }
 
 
-void DrawEditItemTab() {
-    DrawPickedItemProperties();
+void DrawEditItemTab(CGameCtnEditorFree@ editor) {
+    DrawPickedItemProperties(editor);
 }
 
-void DrawEditBlockTab() {
-    DrawPickedBlockPoints();
+void DrawEditBlockTab(CGameCtnEditorFree@ editor) {
+    DrawPickedBlockPoints(editor);
 }
 
 
 [Setting hidden]
-bool S_DrawPickedBlockHelpers = false;
+bool S_DrawPickedBlockHelpers = true;
 [Setting hidden]
-bool S_DrawPickedBlockBox = false;
+bool S_DrawPickedBlockBox = true;
 
+bool m_BlockChanged = false;
 
-void DrawPickedBlockPoints() {
+void DrawPickedBlockPoints(CGameCtnEditorFree@ editor) {
     UI::Text("Picked Block Properties:");
 
     if (lastPickedBlock is null) {
@@ -99,6 +100,51 @@ void DrawPickedBlockPoints() {
         nvgDrawCoordHelpers(m);
         // nvgDrawCoordHelpers(m * mat4::Translate(vec3(16, 2, 16)));
     }
+
+    vec3 prePos = GetBlockLocation(block);
+    vec3 preRot = GetBlockRotation(block);
+
+    if (IsBlockFree(block)) {
+        SetBlockLocation(block, UI::InputFloat3("Pos.##picked-block-pos", GetBlockLocation(block)));
+        SetBlockRotation(block, UI::InputAngles3("Rot (Deg)##picked-block-rot", GetBlockRotation(block)));
+    } else {
+        block.CoordX = UI::InputInt("CoordX", block.CoordX);
+        block.CoordY = UI::InputInt("CoordY", block.CoordY);
+        block.CoordZ = UI::InputInt("CoordZ", block.CoordZ);
+        if (UI::BeginCombo("BlockDir", tostring(block.BlockDir))) {
+            for (uint i = 0; i < 4; i++) {
+                if (UI::Selectable(tostring(CGameCtnBlock::ECardinalDirections(i)), uint(block.BlockDir) == i)) {
+                    block.BlockDir = CGameCtnBlock::ECardinalDirections(i);
+                }
+            }
+            UI::EndCombo();
+        }
+    }
+
+    m_BlockChanged = m_BlockChanged
+        || !Math::Vec3Eq(prePos, GetBlockLocation(block))
+        || !Math::Vec3Eq(preRot, GetBlockRotation(block));
+
+    UI::BeginDisabled(!m_BlockChanged);
+    if (UI::Button("Refresh All##blocks")) {
+        trace('refreshing blocks; changed:');
+        @lastPickedBlock = null;
+        @block = null;
+        RefreshBlocksAndItems(editor);
+        trace('refresh done');
+        if (m_BlockChanged) {
+            @lastPickedBlock = ReferencedNod(editor.Challenge.Blocks[editor.Challenge.Blocks.Length - 1]);
+            UpdatePickedBlockCachedValues();
+            trace('updated last picked block');
+            @block = lastPickedBlock.AsBlock();
+        } else {
+            trace('block not changed');
+        }
+    }
+    UI::EndDisabled();
+
+    if (block is null) return;
+
     if (IsBlockFree(block)) {
         DrawNudgeFor(block);
     } else {
@@ -109,7 +155,7 @@ void DrawPickedBlockPoints() {
 
 float cursorCoordHelpersSize = 10.;
 
-void DrawPickedItemProperties() {
+void DrawPickedItemProperties(CGameCtnEditorFree@ editor) {
     UI::Text("Picked Item Properties:");
 
     if (lastPickedItem is null) {
@@ -131,6 +177,16 @@ void DrawPickedItemProperties() {
     item.AbsolutePositionInMap = UI::InputFloat3("Pos.##picked-item-pos", item.AbsolutePositionInMap);
     SetItemRotations(item, UI::InputAngles3("Rot (Deg)##picked-item-rot", GetItemRotations(item)));
 
+    if (UI::Button("Refresh All##items")) {
+        auto nbRefs = Reflection::GetRefCount(item);
+        RefreshBlocksAndItems(editor);
+        if (nbRefs != Reflection::GetRefCount(item)) {
+            @lastPickedItem = ReferencedNod(editor.Challenge.AnchoredObjects[editor.Challenge.AnchoredObjects.Length - 1]);
+            UpdatePickedItemCachedValues();
+            @item = lastPickedItem.AsItem();
+        }
+    }
+
     nvgCircleWorldPos(item.AbsolutePositionInMap);
     nvg::StrokeColor(vec4(0, 1, 1, 1));
     nvg::StrokeWidth(3);
@@ -145,8 +201,27 @@ void DrawPickedItemProperties() {
     UI::Text("Nudge Picked Item:");
 
     DrawNudgeFor(item);
+
+    UI::Separator();
+    UI::TextWrapped("Relative Position Calculator (useful for static respawns)");
+    m_Calc_AbsPosition = UI::InputFloat3("Absolute Position", m_Calc_AbsPosition);
+    UI::SameLine();
+    if (UI::Button("Reset###clac-abs-position")) {
+        m_Calc_AbsPosition = vec3();
+    }
+    auto m = GetItemMatrix(item);
+    vec3 relPos = (mat4::Inverse(m) * m_Calc_AbsPosition).xyz;
+    UI::Text("Relative Position: " + relPos.ToString());
+    if (UI::IsItemClicked()) {
+        SetClipboard(relPos.ToString());
+    }
 }
 
+
+vec3 m_Calc_AbsPosition = vec3();
+
+
+// draw last as can invalidate item/block reference
 void DrawNudgeFor(CMwNod@ nod) {
     auto item = cast<CGameCtnAnchoredObject>(nod);
     auto block = cast<CGameCtnBlock>(nod);
@@ -155,7 +230,7 @@ void DrawNudgeFor(CMwNod@ nod) {
     vec3 itemRotMod = vec3();
 
     m_PosStepSize = UI::InputFloat("Pos. Step Size", m_PosStepSize, 0.01);
-    m_RotStepSize = UI::InputFloat("Rot. Step Size", m_RotStepSize, 0.01);
+    m_RotStepSize = Math::ToRad(UI::InputFloat("Rot. Step Size (D)", Math::ToDeg(m_RotStepSize), 0.1));
 
     UI::Text("Pos:");
     UI::SameLine();
@@ -237,6 +312,7 @@ void DrawNudgeFor(CMwNod@ nod) {
             // the updated item will be the last item in the array and has a new pointer
             // items that weren't updated keep the same pointer
             @lastPickedItem = ReferencedNod(editor.Challenge.AnchoredObjects[editor.Challenge.AnchoredObjects.Length - 1]);
+            UpdatePickedItemCachedValues();
         } else if (block !is null) {
             @lastPickedBlock = ReferencedNod(editor.Challenge.Blocks[editor.Challenge.Blocks.Length - 1]);
             UpdatePickedBlockCachedValues();

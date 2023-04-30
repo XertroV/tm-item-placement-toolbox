@@ -4,7 +4,7 @@ CGameItemModel@ currentItem = null;
 
 void DrawMainWindowInner() {
     auto editor = cast<CGameCtnEditorFree>(GetApp().Editor);
-    if (editor is null) {
+    if (editor is null || !IsInEditor) {
         UI::Text("Not in editor...");
         return;
     }
@@ -49,12 +49,12 @@ void DrawMainWindowInner() {
     }
 
     if (UI::BeginTabItem("Edit Item")) {
-        DrawEditItemTab();
+        DrawEditItemTab(editor);
         UI::EndTabItem();
     }
 
     if (UI::BeginTabItem("Edit Block")) {
-        DrawEditBlockTab();
+        DrawEditBlockTab(editor);
         UI::EndTabItem();
     }
 

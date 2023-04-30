@@ -34,4 +34,11 @@ namespace UI {
         }
         return val;
     }
+
+    nat3 InputNat3(const string &in label, nat3 val) {
+        auto x = UI::InputInt("(X) " + label, val.x);
+        auto y = UI::InputInt("(Y) " + label, val.y);
+        auto z = UI::InputInt("(Z) " + label, val.z);
+        return nat3(x, y, z);
+    }
 }

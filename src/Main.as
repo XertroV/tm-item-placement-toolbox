@@ -31,7 +31,13 @@ void RenderEarly() {
     IsInCurrentPlayground = currPg !is null;
 
     EnteringEditor = !IsInEditor;
-    IsInEditor = editor !is null;
+    // we're in the editor if it's not null and we were in the editor, or if we weren't then we wait for the editor to be ready for a request
+    IsInEditor = editor !is null && (
+        IsInEditor || (
+            editor.PluginMapType !is null
+            && editor.PluginMapType.IsEditorReadyForRequest
+        )
+    );
     EnteringEditor = EnteringEditor && IsInEditor;
 }
 
@@ -40,7 +46,8 @@ void Render() {
     if (!UserHasPermissions) return;
     if (EnteringEditor)
         trace('Updating editor watchers.');
-    UpdateEditorWatchers(cast<CGameCtnEditorFree>(GetApp().Editor));
+    // send null if we're not flagged as in the editor to wait for it to update
+    UpdateEditorWatchers(IsInEditor ? cast<CGameCtnEditorFree>(GetApp().Editor) : null);
     if (EnteringEditor)
         trace('Done updating editor watchers.');
 }
@@ -110,4 +117,10 @@ uint16 GetOffset(const string &in className, const string &in memberName) {
     auto ty = Reflection::GetType(className);
     auto memberTy = ty.GetMember(memberName);
     return memberTy.Offset;
+}
+
+
+void SetClipboard(const string &in msg) {
+    IO::SetClipboard(msg);
+    Notify("Copied: " + msg);
 }

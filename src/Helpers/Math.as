@@ -30,4 +30,8 @@ namespace Math {
             Math::Min(a.z, b.z)
         );
     }
+
+    bool Vec3Eq(vec3 a, vec3 b) {
+        return a.x == b.x && a.y == b.y && a.z == b.z;
+    }
 }

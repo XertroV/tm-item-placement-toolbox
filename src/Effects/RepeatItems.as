@@ -148,6 +148,8 @@ namespace Repeat {
         }
 
         void DrawControls(CGameCtnEditorFree@ editor) override {
+            RepeatMethod::DrawControls(editor);
+
             UI::Text("Item to World Transformation");
 
             UI::BeginDisabled();
@@ -160,8 +162,13 @@ namespace Repeat {
 
             UI::BeginDisabled();
             item_Pos = UI::SliderFloat3("Init. Pos Offset", item_Pos, -64, 64, "%.4f");
-            item_Rot = UI::SliderAngles3("Init. Rot Offset (Deg)", item_Rot);
+            if (!m_IgnoreItemRotation) {
+                item_Rot = UI::SliderAngles3("Init. Rot Offset (Deg)", item_Rot);
+            }
             UI::EndDisabled();
+            if (m_IgnoreItemRotation) {
+                item_RotCustom = UI::SliderAngles3("Init. Rot Offset (Deg)", item_RotCustom);
+            }
 
             UI::Separator();
 
@@ -301,10 +308,13 @@ class RepeatMethod {
     mat4 itemOffsetRotInv = mat4::Identity();
     vec3 item_Pos = vec3();
     vec3 item_Rot = vec3();
+    vec3 item_RotCustom = vec3();
 
     RepeatMethod(const string &in name) {
         this.name = name;
     }
+
+    bool m_IgnoreItemRotation = false;
 
     void UpdateMatricies() {
         auto item = Repeat::lastPicked !is null ? Repeat::lastPicked.AsItem() : null;
@@ -317,6 +327,9 @@ class RepeatMethod {
             itw_Pos = item.AbsolutePositionInMap;
             item_Rot = ItemsEuler(item);
             item_Pos = pivot;
+            if (m_IgnoreItemRotation) {
+                item_Rot = item_RotCustom;
+            }
         }
 
         itemToWorld = mat4::Translate(itw_Pos);
@@ -348,8 +361,9 @@ class RepeatMethod {
     }
 
     void DrawControls(CGameCtnEditorFree@ editor) {
-
+        m_IgnoreItemRotation = UI::Checkbox("Ignore Item Rotation", m_IgnoreItemRotation);
     }
+
     void DrawHelpers(bool withLinesBetween) {
         if (!Repeat::S_ShowRepeatHelpers) return;
         nvg::Reset();
@@ -413,6 +427,8 @@ class SpiralRepeat : RepeatMethod {
     }
 
     void DrawControls(CGameCtnEditorFree@ editor) override {
+        RepeatMethod::DrawControls(editor);
+
         UpdateMatricies();
 
         spiral_NbIter = Math::Clamp(UI::InputInt("Nb. Items", spiral_NbIter, 1), 1, 5000);
@@ -485,6 +501,8 @@ class GridRepeat : RepeatMethod {
     }
 
     void DrawControls(CGameCtnEditorFree@ editor) override {
+        RepeatMethod::DrawControls(editor);
+
         // if (UI::Button("Reset All")) {
         //     ResetAllGridSettings();
         // }
@@ -492,9 +510,13 @@ class GridRepeat : RepeatMethod {
         UI::TextWrapped("Grid Orientation");
 
         grid_UseItemAlignment = UI::Checkbox("Start from Item Alignment", grid_UseItemAlignment);
-        UI::BeginDisabled();
-        item_Rot = UI::SliderAngles3("Item Rot (Deg)", item_Rot);
-        UI::EndDisabled();
+        if (m_IgnoreItemRotation) {
+            item_RotCustom = UI::SliderAngles3("Item Rot (Deg)##custom", item_RotCustom);
+        } else {
+            UI::BeginDisabled();
+            item_Rot = UI::SliderAngles3("Item Rot (Deg)##main", item_Rot);
+            UI::EndDisabled();
+        }
         grid_Rot = UI::SliderAngles3("Grid Rot (Deg)", grid_Rot);
 
         UI::Separator();

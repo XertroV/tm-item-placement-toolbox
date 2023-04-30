@@ -153,6 +153,10 @@ vec3 GetItemPivot(CGameCtnAnchoredObject@ item) {
     return Dev::GetOffsetVec3(item, pivotOffset);
 }
 
+mat4 GetItemMatrix(CGameCtnAnchoredObject@ item) {
+    return mat4::Translate(item.AbsolutePositionInMap) * EulerToMat(GetItemRotations(item));
+}
+
 uint16 FreeBlockPosOffset = GetOffset("CGameCtnBlock", "Dir") + 0x8;
 uint16 FreeBlockRotOffset = FreeBlockPosOffset + 0xC;
 

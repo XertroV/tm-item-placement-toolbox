@@ -24,7 +24,13 @@ class ReferencedNod {
     }
 
     ~ReferencedNod() {
+        if (nod is null) return;
         nod.MwRelease();
+        @nod = null;
+    }
+
+    // force release the nod if the game clears the memory for whatever reason
+    void NullifyNoRelease() {
         @nod = null;
     }
 
