@@ -26,3 +26,35 @@
 
  */
 ;
+
+
+/**
+ blocks
+
+    0x84: 4 bytes, includes variant index and mobil index
+
+    00 00 BlockInfoVarIndex?
+
+    xxxx xxxx VVVV MMMM ---- ---- ---- ----
+
+    22
+    block info var index
+    iseditableinpuzzleorsimpleeditor
+
+    22
+
+    f -> isGround = true
+
+    2nd 2 -> mobile variant index = 8
+
+    byte order flipped, difference is
+    # orig: 10410040, not isEdiable in puzzle or simple editor
+    >>> bin(0x40004110)
+    '0b1000000000000000100000100010000'
+    # orig: 10412040, isEditbaleInPuzzleOrSimpleEditor
+    >>> bin(0x40204110)
+    '0b1000000001000000100000100010000'
+
+
+ */
+ ;

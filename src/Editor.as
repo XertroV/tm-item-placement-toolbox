@@ -243,6 +243,14 @@ vec3 CoordToPos(vec3 coord) {
     return vec3(coord.x * 32, (int(coord.y) - 8) * 8, coord.z * 32);
 }
 
+nat3 PosToCoord(vec3 pos) {
+    return nat3(
+        uint(Math::Floor(pos.x / 32.)),
+        uint(Math::Floor(pos.y / 8. + 8.)),
+        uint(Math::Floor(pos.z / 32.))
+    );
+}
+
 vec3 GetBlockSize(CGameCtnBlock@ block) {
     return GetBlockCoordSize(block) * vec3(32, 8, 32);
 }

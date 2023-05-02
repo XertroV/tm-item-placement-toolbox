@@ -1,5 +1,5 @@
 bool GameVersionSafe = false;
-const string[] KnownSafeVersions = {"2023-03-31_13_17"};
+const string[] KnownSafeVersions = {"2023-03-31_13_17", "2023-04-28_17_34"};
 
 /**
  * New version checklist:
@@ -22,6 +22,7 @@ void EnsureGameVersionCompatibility() {
     GameVersionSafe = KnownSafeVersions.Find(TmGameVersion) > -1;
     if (GameVersionSafe) return;
     GameVersionSafe = GetStatusFromOpenplanet();
+    trace("Got GameVersionSafe status: " + GameVersionSafe);
 }
 
 void WarnBadGameVersion() {
