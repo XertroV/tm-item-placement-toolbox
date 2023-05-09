@@ -387,8 +387,7 @@ void UpdatePickedBlockCachedValues() {
 
 
 // East + 75deg is nearly north.
-void CheckForPickedItem_CopyRotation() {
-    auto editor = cast<CGameCtnEditorFree>(GetApp().Editor);
+void CheckForPickedItem_CopyRotation(CGameCtnEditorFree@ editor) {
     if (editor is null) return;
     if (editor.PickedObject is null) return;
     if (editor.Cursor is null) return;
@@ -412,8 +411,7 @@ void CheckForPickedItem_CopyRotation() {
     cursor.AdditionalDir = CGameCursorBlock::EAdditionalDirEnum(yawStep);
 }
 
-void EnsureSnappedLoc() {
-    auto editor = cast<CGameCtnEditorFree>(GetApp().Editor);
+void EnsureSnappedLoc(CGameCtnEditorFree@ editor) {
     if (editor is null) return;
     if (editor.Cursor is null) return;
     editor.Cursor.UseSnappedLoc = true;

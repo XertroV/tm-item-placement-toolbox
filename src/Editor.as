@@ -26,7 +26,6 @@ void UpdateNewlyAddedItems(CGameCtnEditorFree@ editor, bool withRefresh = false)
 
 
 // when there are duplicate blockIds this is may not save and occasionally results in crash-on-saves (but not autosaves)
-//
 CGameCtnAnchoredObject@ DuplicateAndAddItem(CGameCtnEditorFree@ editor, CGameCtnAnchoredObject@ origItem, bool updateItemsAfter = false) {
     auto item = CGameCtnAnchoredObject();
     auto itemTy = Reflection::GetType("CGameCtnAnchoredObject");

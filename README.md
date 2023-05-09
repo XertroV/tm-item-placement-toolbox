@@ -15,6 +15,10 @@ Coming soon:
 
 * Copy item skins from one item to a selection or all items
 
+Ideas:
+
+* Place random items from inventory
+
 License: Public Domain
 
 Authors: XertroV
